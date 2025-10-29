@@ -62,6 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
     blur: 0,
     highlight: 0,
     shadow: 0,
+    sharpen: 0,
+    unblur: 0,
+    denoise: 0,
   };
   let isCropping = false;
   let cropStartX, cropStartY;
@@ -82,15 +85,115 @@ document.addEventListener("DOMContentLoaded", () => {
     return filter;
   }
 
+  // --- Pixel Manipulation Filters ---
+
+  function applySharpenFilter(imageData, amount) {
+    const data = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
+    const outputData = new Uint8ClampedArray(data);
+
+    const kernel = [
+      [0, -1, 0],
+      [-1, 5, -1],
+      [0, -1, 0],
+    ];
+
+    const factor = amount / 100;
+
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        let r = 0,
+          g = 0,
+          b = 0;
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            const pixelIndex = ((y + ky) * width + (x + kx)) * 4;
+            const weight = kernel[ky + 1][kx + 1];
+            r += outputData[pixelIndex] * weight;
+            g += outputData[pixelIndex + 1] * weight;
+            b += outputData[pixelIndex + 2] * weight;
+          }
+        }
+        const i = (y * width + x) * 4;
+        data[i] = outputData[i] + (r - outputData[i]) * factor;
+        data[i + 1] = outputData[i + 1] + (g - outputData[i + 1]) * factor;
+        data[i + 2] = outputData[i + 2] + (b - outputData[i + 2]) * factor;
+      }
+    }
+  }
+
+  function applyDenoiseFilter(imageData, amount) {
+    if (amount === 0) return;
+    const data = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
+    const outputData = new Uint8ClampedArray(data);
+    const radius = Math.floor(amount / 2); // Simple radius based on amount
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let r = 0,
+          g = 0,
+          b = 0,
+          count = 0;
+        for (let dy = -radius; dy <= radius; dy++) {
+          for (let dx = -radius; dx <= radius; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+              const i = (ny * width + nx) * 4;
+              r += outputData[i];
+              g += outputData[i + 1];
+              b += outputData[i + 2];
+              count++;
+            }
+          }
+        }
+        const i = (y * width + x) * 4;
+        data[i] = r / count;
+        data[i + 1] = g / count;
+        data[i + 2] = b / count;
+      }
+    }
+  }
+
   function applyPixelFilters(imageData) {
     const data = imageData.data;
     const highlight = filterSettings.highlight;
     const shadow = filterSettings.shadow;
+    const sharpen = filterSettings.sharpen;
+    const unblur = filterSettings.unblur;
+    const denoise = filterSettings.denoise;
 
-    if (highlight === 0 && shadow === 0) {
+    // Early exit if no pixel filters are active
+    if (
+      highlight === 0 &&
+      shadow === 0 &&
+      sharpen === 0 &&
+      unblur === 0 &&
+      denoise === 0
+    ) {
       return; // No change needed
     }
 
+    // Denoise should be applied first as it's a smoothing operation
+    if (denoise > 0) {
+      applyDenoiseFilter(imageData, denoise);
+    }
+
+    // Sharpen and Unblur (they do the same thing, so we can combine their strength)
+    const sharpenAmount = Math.max(sharpen, unblur);
+    if (sharpenAmount > 0) {
+      applySharpenFilter(imageData, sharpenAmount);
+    }
+
+    // Apply highlight/shadow adjustments after other pixel ops
+    applyHighlightShadow(imageData, highlight, shadow);
+  }
+
+  function applyHighlightShadow(imageData, highlight, shadow) {
+    const data = imageData.data;
     for (let i = 0; i < data.length; i += 4) {
       let r = data[i];
       let g = data[i + 1];
@@ -152,7 +255,13 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.restore();
 
     // Apply pixel-based filters (Highlights/Shadows)
-    if (filterSettings.highlight !== 0 || filterSettings.shadow !== 0) {
+    if (
+      filterSettings.highlight !== 0 ||
+      filterSettings.shadow !== 0 ||
+      filterSettings.sharpen > 0 ||
+      filterSettings.unblur > 0 ||
+      filterSettings.denoise > 0
+    ) {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       applyPixelFilters(imageData);
       ctx.putImageData(imageData, 0, 0);
@@ -268,15 +377,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   // Separate listener for pixel-based filters to trigger a full redraw
-  document.querySelectorAll("#highlight, #shadow").forEach((slider) => {
-    if (slider) {
-      slider.addEventListener("input", (e) => {
-        const id = e.target.id;
-        filterSettings[id] = parseInt(e.target.value);
-        drawImageOnCanvas();
-      });
-    }
-  });
+  document
+    .querySelectorAll("#highlight, #shadow, #sharpen, #unblur, #denoise")
+    .forEach((slider) => {
+      if (slider) {
+        slider.addEventListener("input", (e) => {
+          const id = e.target.id;
+          filterSettings[id] = parseInt(e.target.value);
+          drawImageOnCanvas(); // These filters require a full canvas redraw
+        });
+      }
+    });
 
   // Event listeners for drawing controls
   if (drawModeButton) {
@@ -392,6 +503,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("blur").value = 0;
     document.getElementById("highlight").value = 0;
     document.getElementById("shadow").value = 0;
+    document.getElementById("sharpen").value = 0;
+    document.getElementById("unblur").value = 0;
+    document.getElementById("denoise").value = 0;
 
     Object.assign(filterSettings, {
       exposure: 100,
@@ -400,6 +514,9 @@ document.addEventListener("DOMContentLoaded", () => {
       blur: 0,
       highlight: 0,
       shadow: 0,
+      sharpen: 0,
+      unblur: 0,
+      denoise: 0,
     });
 
     rotationAngle = 0;

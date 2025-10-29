@@ -196,6 +196,75 @@
               />
             </div>
 
+            <!-- Advanced Filters -->
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-text-muted"
+                title="Sharpen"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 2L2 22h20L12 2z"></path>
+              </svg>
+              <input
+                type="range"
+                id="sharpen"
+                title="Sharpen"
+                min="0"
+                max="100"
+                value="0"
+                class="w-36 h-1"
+              />
+            </div>
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-text-muted"
+                title="Unblur"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 2L2 22h20L12 2z" opacity="0.6"></path>
+              </svg>
+              <input
+                type="range"
+                id="unblur"
+                title="Unblur"
+                min="0"
+                max="100"
+                value="0"
+                class="w-36 h-1"
+              />
+            </div>
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-text-muted"
+                title="Denoise"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M3 3h2v2H3zM7 3h2v2H7zM11 3h2v2h-2zM15 3h2v2h-2zM19 3h2v2h-2zM3 7h2v2H3zM19 7h2v2h-2zM3 11h2v2H3zM19 11h2v2h-2zM3 15h2v2H3zM19 15h2v2h-2zM3 19h2v2H3zM7 19h2v2H7zM11 19h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"
+                ></path>
+              </svg>
+              <input
+                type="range"
+                id="denoise"
+                title="Denoise"
+                min="0"
+                max="10"
+                value="0"
+                class="w-36 h-1"
+              />
+            </div>
+
             <!-- Drawing Controls -->
             <div class="flex items-center gap-2">
               <button
