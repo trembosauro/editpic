@@ -23,8 +23,10 @@
             class="flex items-center gap-x-3 gap-y-2 flex-wrap"
           >
             <!-- Adjustments -->
-            <div class="flex flex-col">
-              <label for="exposure" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="exposure"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Exposure</label
               >
               <input
@@ -33,11 +35,13 @@
                 min="0"
                 max="200"
                 value="100"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col">
-              <label for="contrast" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="contrast"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Contrast</label
               >
               <input
@@ -46,11 +50,13 @@
                 min="0"
                 max="200"
                 value="100"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col">
-              <label for="saturation" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="saturation"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Saturation</label
               >
               <input
@@ -59,11 +65,13 @@
                 min="0"
                 max="200"
                 value="100"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col">
-              <label for="blur" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="blur"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Blur</label
               >
               <input
@@ -73,13 +81,15 @@
                 max="10"
                 step="0.1"
                 value="0"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
 
             <!-- Highlights and Shadows -->
-            <div class="flex flex-col">
-              <label for="highlight" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="highlight"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Highlights</label
               >
               <input
@@ -88,11 +98,13 @@
                 min="-100"
                 max="100"
                 value="0"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col">
-              <label for="shadow" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="shadow"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Shadows</label
               >
               <input
@@ -101,13 +113,15 @@
                 min="-100"
                 max="100"
                 value="0"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
 
             <!-- Advanced Filters -->
-            <div class="flex flex-col">
-              <label for="sharpen" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="sharpen"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Sharpen</label
               >
               <input
@@ -116,11 +130,13 @@
                 min="0"
                 max="100"
                 value="0"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col">
-              <label for="unblur" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="unblur"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Unblur</label
               >
               <input
@@ -129,11 +145,13 @@
                 min="0"
                 max="100"
                 value="0"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col">
-              <label for="denoise" class="text-xs text-text-muted mb-1"
+            <div class="flex flex-col slider-control-wrapper">
+              <label
+                for="denoise"
+                class="text-xs text-text-muted mb-1 cursor-pointer"
                 >Denoise</label
               >
               <input
@@ -142,7 +160,7 @@
                 min="0"
                 max="10"
                 value="0"
-                class="w-36 h-1"
+                class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
 

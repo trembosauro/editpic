@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const brushSizeSlider = document.getElementById("brushSize");
   const undoButton = document.getElementById("undoButton");
   const redoButton = document.getElementById("redoButton");
+  const lightnessSlider = document.getElementById("lightnessSlider");
 
   let currentImage = null;
   let originalImage = null;
@@ -281,17 +282,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (flipVerticalButton) flipVerticalButton.disabled = !enabled;
     if (cropButton) cropButton.disabled = !enabled;
     if (drawModeButton) drawModeButton.disabled = !enabled;
-    if (brushSizeSlider) brushSizeSlider.disabled = !enabled;
+    if (brushSizeSlider) brushSizeSlider.disabled = !enabled; // Brush size slider
+    if (undoButton) undoButton.disabled = !enabled; // Undo button
+    if (redoButton) redoButton.disabled = !enabled; // Redo button
+    if (lightnessSlider) lightnessSlider.disabled = !enabled; // Lightness slider
+
+    const colorSwatches = document.querySelectorAll(".color-swatch");
+    colorSwatches.forEach((swatch) => (swatch.disabled = !enabled));
+
     if (changeImageButton)
       changeImageButton.style.display = enabled ? "flex" : "none";
 
     if (!enabled) {
-      if (isDrawingMode) toggleDrawingMode();
+      if (isDrawingMode) toggleDrawingMode(); // This will hide drawing-options
     }
 
-    const drawingOptions = document.getElementById("drawing-options");
-    if (drawingOptions)
-      drawingOptions.style.display = enabled ? "flex" : "none";
     if (resetButton) resetButton.disabled = !enabled;
     if (downloadButton) downloadButton.disabled = !enabled;
     updateUndoRedoState();
@@ -422,7 +427,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  const lightnessSlider = document.getElementById("lightnessSlider");
   if (lightnessSlider) {
     lightnessSlider.addEventListener("input", (e) => {
       drawingColor = adjustLightness(
@@ -459,7 +463,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Set initial state for drawing options
   const initialDrawingOptions = document.getElementById("drawing-options");
   if (initialDrawingOptions) {
     initialDrawingOptions.style.display = "none";
@@ -474,18 +477,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const sliderWrappers = document.querySelectorAll(".slider-control-wrapper");
+  sliderWrappers.forEach((wrapper) => {
+    const label = wrapper.querySelector("label");
+    const slider = wrapper.querySelector(".adjustable-slider");
+
+    if (label && slider) {
+      label.addEventListener("click", () => {
+        const isCurrentlyActive = wrapper.classList.contains("active-control");
+
+        // Hide all other sliders and remove active state
+        sliderWrappers.forEach((otherWrapper) => {
+          otherWrapper.classList.remove("active-control");
+          const otherSlider = otherWrapper.querySelector(".adjustable-slider");
+          if (otherSlider) {
+            otherSlider.classList.add("hidden");
+          }
+        });
+
+        // If the clicked one wasn't active, activate it
+        if (!isCurrentlyActive) {
+          wrapper.classList.add("active-control");
+          slider.classList.remove("hidden");
+        }
+      });
+    }
+  });
+
   function toggleDrawingMode() {
     isDrawingMode = !isDrawingMode;
     if (isDrawingMode) {
       drawModeButton.classList.add("active-transform-button");
       if (isCropping) exitCropMode(false);
       canvas.style.cursor = "crosshair";
-      document.getElementById("drawing-options").style.display = "flex";
+      const drawingOptions = document.getElementById("drawing-options");
+      if (drawingOptions) drawingOptions.style.display = "flex";
       updateStatus("Drawing mode activated.");
     } else {
       drawModeButton.classList.remove("active-transform-button");
       canvas.style.cursor = "default";
-      document.getElementById("drawing-options").style.display = "none";
+      const drawingOptions = document.getElementById("drawing-options");
+      if (drawingOptions) drawingOptions.style.display = "none";
       updateStatus("Drawing mode deactivated.");
     }
 
