@@ -240,9 +240,9 @@
                 </div>
             </div>
             <div class="lg:col-span-2">
-                <div class="bg-card-bg p-6 rounded-3xl shadow-2xl h-full flex flex-col items-center space-y-4">
+                <div class="bg-card-bg p-6 rounded-3xl h-full flex flex-col items-center">
                     <input type="file" id="fileInput" accept="image/*">
-                    <div id="canvas-container" class="w-full">
+                    <div id="canvas-container" class="w-full mb-6">
                         <canvas id="imageCanvas" class="hidden"></canvas>
                         <div id="cropSelection"></div>
                         <label id="centerUploadArea" for="fileInput" class="text-text-color hover:bg-primary/10 transition duration-200">
@@ -254,13 +254,19 @@
                             </div>
                         </label>
                     </div>
-                    <button id="downloadButton" class="w-full max-w-sm bg-secondary hover:opacity-90 transition duration-200 py-3 rounded-full font-bold shadow-lg mt-4 disabled:opacity-50 text-primary-text" disabled>
-                        Baixar Imagem Editada
-                    </button>
-                    <button id="changeImageButton" class="w-full max-w-sm bg-border-color hover:bg-border-color/80 transition duration-200 py-3 rounded-full font-bold shadow-lg disabled:opacity-50 text-text-color" style="display: none;">
-                        Trocar Imagem
-                    </button>
-                    <p id="statusMessage" class="text-center text-sm text-text-muted mt-2 h-5"></p>
+                    <div class="flex flex-col lg:flex-row gap-4 w-full max-w-sm">
+                        <button id="downloadButton" class="flex-1 bg-secondary hover:opacity-90 transition duration-200 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 text-primary-text flex justify-center items-center" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        <button id="changeImageButton" class="flex-1 bg-border-color hover:bg-border-color/80 transition duration-200 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 text-text-color flex justify-center items-center" style="display: none;">
+                            Trocar Imagem
+                        </button>
+                    </div>
+                    <p id="statusMessage" class="text-center text-sm text-text-muted mt-4 h-5"></p>
                 </div>
             </div>
         </main>
