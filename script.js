@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = imageData.data;
     const width = imageData.width;
     const height = imageData.height;
-    const outputData = new Uint8ClampedArray(data);
+    const inputData = new Uint8ClampedArray(data); // Use a copy for reading
 
     const kernel = [
       [0, -1, 0],
@@ -97,16 +97,17 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let ky = -1; ky <= 1; ky++) {
           for (let kx = -1; kx <= 1; kx++) {
             const pixelIndex = ((y + ky) * width + (x + kx)) * 4;
-            const weight = kernel[ky + 1][kx + 1];
-            r += outputData[pixelIndex] * weight;
-            g += outputData[pixelIndex + 1] * weight;
-            b += outputData[pixelIndex + 2] * weight;
+            const weight = kernel[ky + 1][kx + 1]; // Read from the copy
+            r += inputData[pixelIndex] * weight;
+            g += inputData[pixelIndex + 1] * weight;
+            b += inputData[pixelIndex + 2] * weight;
           }
         }
         const i = (y * width + x) * 4;
-        data[i] = outputData[i] + (r - outputData[i]) * factor;
-        data[i + 1] = outputData[i + 1] + (g - outputData[i + 1]) * factor;
-        data[i + 2] = outputData[i + 2] + (b - outputData[i + 2]) * factor;
+        // Interpolate between original and sharpened pixel
+        data[i] = inputData[i] * (1 - factor) + r * factor;
+        data[i + 1] = inputData[i + 1] * (1 - factor) + g * factor;
+        data[i + 2] = inputData[i + 2] * (1 - factor) + b * factor;
       }
     }
   }
@@ -233,9 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
       currentImage.naturalHeight
     );
 
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.scale(flipH, flipV);
-    ctx.rotate((rotationAngle * Math.PI) / 180);
     ctx.restore();
 
     if (
@@ -347,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document
-    .querySelectorAll('#controls input[type="range"]')
+    .querySelectorAll("#exposure, #contrast, #saturation, #blur")
     .forEach((slider) => {
       if (slider) {
         slider.addEventListener("input", (e) => {
@@ -459,29 +457,47 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function hideAllSliders() {
-    sliderWrappers.forEach((wrapper) => {
+    // Remove active state from all labels
+    document.querySelectorAll(".slider-control-wrapper").forEach((wrapper) => {
       wrapper.classList.remove("active-control");
-      const slider = wrapper.querySelector(".adjustable-slider");
-      if (slider) {
-        slider.classList.add("hidden");
-      }
     });
+    // Hide all sliders that are inside the tool panel
+    document
+      .querySelectorAll("#vertical-tool-panel .adjustable-slider")
+      .forEach((slider) => {
+        slider.classList.add("hidden");
+      });
   }
 
+  function hideAllToolPanels() {
+    hideAllSliders();
+    if (isDrawingMode) {
+      // Ensure drawing mode is turned off and its panel is hidden
+      isDrawingMode = false;
+      drawModeButton.classList.remove("active-transform-button");
+      document.getElementById("drawing-options").classList.add("hidden");
+      canvas.style.cursor = "default";
+    }
+  }
   const sliderWrappers = document.querySelectorAll(".slider-control-wrapper");
   sliderWrappers.forEach((wrapper) => {
     const label = wrapper.querySelector("label");
-    const slider = wrapper.querySelector(".adjustable-slider");
+    const sliderId = label.getAttribute("for");
+    const slider = document.getElementById(sliderId);
 
     if (label && slider) {
       label.addEventListener("click", () => {
         const isCurrentlyActive = wrapper.classList.contains("active-control");
 
-        hideAllSliders();
-
+        hideAllToolPanels(); // Hide all panels first
         if (!isCurrentlyActive) {
           wrapper.classList.add("active-control");
           slider.classList.remove("hidden");
+          slider.classList.add("vertical-slider"); // Add vertical class
+          document
+            .getElementById("vertical-tool-panel")
+            .classList.remove("hidden");
+          document.getElementById("vertical-tool-panel").appendChild(slider);
 
           if (isDrawingMode) toggleDrawingMode();
           if (isCropping) exitCropMode(false);
@@ -498,8 +514,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function deactivateAllTools() {
     hideAllSliders();
-    if (isDrawingMode) toggleDrawingMode();
-    if (isCropping) exitCropMode(false);
+    if (isDrawingMode) toggleDrawingMode(); // This will also hide the drawing panel
+    if (isCropping) exitCropMode(false); // This will exit crop mode
   }
 
   const firstSwatch = document.querySelector(".color-swatch");
@@ -515,7 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function toggleDrawingMode() {
     isDrawingMode = !isDrawingMode;
     if (isDrawingMode) {
-      deactivateAllTools();
+      hideAllToolPanels(); // Close other tools before opening this one
       isDrawingMode = true;
       drawModeButton.classList.add("active-transform-button");
       document.getElementById("drawing-options").classList.remove("hidden");
@@ -527,22 +543,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  if (rotateButton) {
-    rotateButton.addEventListener("click", () => {
-      deactivateAllTools();
-      if (!currentImage) return;
-      rotationAngle = (rotationAngle + 90) % 360;
-      redrawImageWithTransformations();
-      updateStatus(`Image rotated to ${rotationAngle}°`);
-    });
-  }
-
   if (flipHorizontalButton) {
     flipHorizontalButton.addEventListener("click", () => {
       deactivateAllTools();
       if (!currentImage) return;
       flipH *= -1;
-      redrawImageWithTransformations();
+      drawImageOnCanvas();
       updateStatus(
         flipH === -1 ? "Image flipped horizontally" : "Horizontal flip removed"
       );
@@ -592,7 +598,7 @@ document.addEventListener("DOMContentLoaded", () => {
     drawnStrokes = [];
     redoStrokes = [];
 
-    deactivateAllTools();
+    deactivateAllTools(); // Deactivate all tools
 
     if (isNewImage) {
       currentImage = null;
@@ -647,7 +653,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (apply && cropRect.width > 0 && cropRect.height > 0) {
       applyCrop();
     }
-    if (isDrawingMode) toggleDrawingMode();
+    if (isDrawingMode) toggleDrawingMode(); // Ensure drawing panel is closed
     isCropping = false;
     cropActions.classList.add("hidden");
     cropSelection.style.display = "none";
@@ -660,7 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (cropButton) {
     cropButton.addEventListener("click", () => {
       if (!currentImage) return;
-      deactivateAllTools();
+      deactivateAllTools(); // Deactivate all other tools
       if (isCropping) return;
       isCropping = true;
       updateStatus("Crop mode activated. Drag to select area.");
@@ -671,6 +677,16 @@ document.addEventListener("DOMContentLoaded", () => {
       cropSelection.style.left = "0px";
       cropSelection.style.top = "0px";
       canvas.style.cursor = "crosshair";
+    });
+  }
+
+  if (rotateButton) {
+    rotateButton.addEventListener("click", () => {
+      deactivateAllTools();
+      if (!currentImage) return;
+      rotationAngle = (rotationAngle + 90) % 360;
+      drawImageOnCanvas();
+      updateStatus(`Image rotated to ${rotationAngle}°`);
     });
   }
 
