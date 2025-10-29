@@ -212,22 +212,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function drawImageOnCanvas() {
-    if (!currentImage) return;
-    const imgWidth = currentImage.naturalWidth || currentImage.width;
-    const imgHeight = currentImage.naturalHeight || currentImage.height;
+    if (!currentImage) {
+      // If no image, clear canvas and exit
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
 
+    // Clear the canvas for a fresh redraw
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Save the untransformed state of the context
     ctx.save();
+
+    // Apply transformations (translate, rotate, scale)
+    ctx.translate(canvas.width / 2, canvas.height / 2); // Move origin to center
+    ctx.rotate((rotationAngle * Math.PI) / 180); // Apply rotation
+    ctx.scale(flipH, flipV); // Apply flip
+
+    // Draw the currentImage (which is the base image) centered
+    ctx.drawImage(
+      currentImage,
+      -currentImage.naturalWidth / 2,
+      -currentImage.naturalHeight / 2,
+      currentImage.naturalWidth,
+      currentImage.naturalHeight
+    );
+
+    // Restore the context to its untransformed state
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.scale(flipH, flipV);
     ctx.rotate((rotationAngle * Math.PI) / 180);
-    ctx.drawImage(
-      currentImage,
-      -imgWidth / 2,
-      -imgHeight / 2,
-      imgWidth,
-      imgHeight
-    );
     ctx.restore();
 
     if (
@@ -245,9 +259,13 @@ document.addEventListener("DOMContentLoaded", () => {
     applyCssFilters();
 
     redrawStrokes();
+    // Note: Real-time drawing in mousemove directly draws on canvas.
+    // When mouseup calls drawImageOnCanvas, this clears and redraws everything,
+    // effectively "baking" the just-completed stroke into the image state.
   }
   function redrawStrokes() {
     drawnStrokes.forEach((stroke) => {
+      if (!stroke.points || stroke.points.length === 0) return;
       ctx.beginPath();
       ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
       for (let i = 1; i < stroke.points.length; i++) {
@@ -337,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  document
+  document // Event listener for CSS filter sliders
     .querySelectorAll('#controls input[type="range"]')
     .forEach((slider) => {
       if (slider) {
@@ -354,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-  document
+  document // Event listener for pixel filter sliders
     .querySelectorAll("#highlight, #shadow, #sharpen, #unblur, #denoise")
     .forEach((slider) => {
       if (slider) {
@@ -365,16 +383,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     });
-
-  if (drawModeButton) {
-    drawModeButton.addEventListener("click", () => {
-      toggleDrawingMode();
-      const drawingOptions = document.getElementById("drawing-options");
-      if (drawingOptions) {
-        drawingOptions.style.display = isDrawingMode ? "flex" : "none";
-      }
-    });
-  }
 
   function hexToRgb(hex) {
     let r = 0,
@@ -459,20 +467,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const initialDrawingOptions = document.getElementById("drawing-options");
-  if (initialDrawingOptions) {
-    initialDrawingOptions.style.display = "none";
-  }
-  const firstSwatch = document.querySelector(".color-swatch");
-  if (firstSwatch) {
-    firstSwatch.classList.add("border-primary");
-  }
-  if (brushSizeSlider) {
-    brushSizeSlider.addEventListener("input", (e) => {
-      brushSize = parseInt(e.target.value);
-    });
-  }
-
   function hideAllSliders() {
     sliderWrappers.forEach((wrapper) => {
       wrapper.classList.remove("active-control");
@@ -506,67 +500,53 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  if (drawModeButton) {
+    drawModeButton.addEventListener("click", () => {
+      toggleDrawingMode();
+    });
+  }
+
+  // Function to deactivate all tools (sliders, drawing, crop)
+  function deactivateAllTools() {
+    hideAllSliders(); // Hides individual sliders
+    if (isDrawingMode) toggleDrawingMode(); // Hides drawing panel and resets drawing state
+    if (isCropping) exitCropMode(false); // Exits crop mode
+  }
+
+  // Initial setup for drawing options
+  const firstSwatch = document.querySelector(".color-swatch");
+  if (firstSwatch) {
+    firstSwatch.classList.add("border-primary");
+  }
+  if (brushSizeSlider) {
+    brushSizeSlider.addEventListener("input", (e) => {
+      brushSize = parseInt(e.target.value);
+    });
+  }
+  // End of initial setup
+
+  // Remove redrawImageWithTransformations as it's no longer needed.
+  // Transformations are now handled directly in drawImageOnCanvas.
+  // The transformation buttons will just update the state variables and call drawImageOnCanvas.
+
   function toggleDrawingMode() {
     isDrawingMode = !isDrawingMode;
     if (isDrawingMode) {
+      deactivateAllTools(); // Close other tools before opening this one
+      isDrawingMode = true; // Set it back to true
       drawModeButton.classList.add("active-transform-button");
-      if (isCropping) exitCropMode(false);
-      hideAllSliders();
+      document.getElementById("drawing-options").classList.remove("hidden");
       canvas.style.cursor = "crosshair";
-      const drawingOptions = document.getElementById("drawing-options");
-      if (drawingOptions) drawingOptions.style.display = "flex";
-      updateStatus("Drawing mode activated.");
     } else {
       drawModeButton.classList.remove("active-transform-button");
+      document.getElementById("drawing-options").classList.add("hidden");
       canvas.style.cursor = "default";
-      const drawingOptions = document.getElementById("drawing-options");
-      if (drawingOptions) drawingOptions.style.display = "none";
-      updateStatus("Drawing mode deactivated.");
     }
-
-    if (currentImage && canvas.classList.contains("hidden")) {
-      canvas.classList.remove("hidden");
-    }
-  }
-
-  function redrawImageWithTransformations() {
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d");
-    const imgWidth = currentImage.naturalWidth || currentImage.width;
-    const imgHeight = currentImage.naturalHeight || currentImage.height;
-    if (rotationAngle === 90 || rotationAngle === 270) {
-      tempCanvas.width = imgHeight;
-      tempCanvas.height = imgWidth;
-    } else {
-      tempCanvas.width = imgWidth;
-      tempCanvas.height = imgHeight;
-    }
-    tempCtx.save();
-    tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-    tempCtx.scale(flipH, flipV);
-    tempCtx.rotate((rotationAngle * Math.PI) / 180);
-    tempCtx.drawImage(
-      currentImage,
-      -imgWidth / 2,
-      -imgHeight / 2,
-      imgWidth,
-      imgHeight
-    );
-    tempCtx.restore();
-    const newImage = new Image();
-    newImage.onload = () => {
-      currentImage = newImage;
-      canvas.width = currentImage.width;
-      canvas.height = currentImage.height;
-      drawImageOnCanvas();
-    };
-    newImage.src = tempCanvas.toDataURL();
   }
 
   if (rotateButton) {
     rotateButton.addEventListener("click", () => {
-      if (isCropping) exitCropMode(false);
-      if (isDrawingMode) toggleDrawingMode();
+      deactivateAllTools();
       if (!currentImage) return;
       rotationAngle = (rotationAngle + 90) % 360;
       redrawImageWithTransformations();
@@ -576,8 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (flipHorizontalButton) {
     flipHorizontalButton.addEventListener("click", () => {
-      if (isCropping) exitCropMode(false);
-      if (isDrawingMode) toggleDrawingMode();
+      deactivateAllTools();
       if (!currentImage) return;
       flipH *= -1;
       redrawImageWithTransformations();
@@ -589,8 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (flipVerticalButton) {
     flipVerticalButton.addEventListener("click", () => {
-      if (isCropping) exitCropMode(false);
-      if (isDrawingMode) toggleDrawingMode();
+      deactivateAllTools();
       if (!currentImage) return;
       flipV *= -1;
       redrawImageWithTransformations();
@@ -631,9 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
     drawnStrokes = [];
     redoStrokes = [];
 
-    exitCropMode(false);
-    if (isDrawingMode) toggleDrawingMode();
-    hideAllSliders();
+    deactivateAllTools(); // Deactivate all tools
 
     if (isNewImage) {
       currentImage = null;
@@ -688,7 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (apply && cropRect.width > 0 && cropRect.height > 0) {
       applyCrop();
     }
-    if (isCropping) hideAllSliders(); // Hide sliders when exiting crop mode
+    if (isDrawingMode) toggleDrawingMode(); // Ensure drawing panel is closed
     isCropping = false;
     cropActions.classList.add("hidden");
     cropSelection.style.display = "none";
@@ -700,9 +676,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (cropButton) {
     cropButton.addEventListener("click", () => {
-      if (!currentImage) return;
-      if (isDrawingMode) toggleDrawingMode();
-      hideAllSliders();
+      if (!currentImage) return; // No image, no crop
+      deactivateAllTools(); // Deactivate all other tools
       if (isCropping) return;
       isCropping = true;
       updateStatus("Crop mode activated. Drag to select area.");
@@ -810,21 +785,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (isDrawingMode && isDrawingStroke) {
         isDrawingStroke = false;
-        ctx.closePath();
-        drawImageOnCanvas(); // Redraw the entire canvas to bake in the new stroke with filters
+        // The stroke is already drawn on the canvas in real-time.
+        // Now, we just need to bake it into the permanent image state by redrawing everything.
+        drawImageOnCanvas();
       } else if (isCropping && isDrawing) {
         isDrawing = false;
         if (cropRect.width > 5 && cropRect.height > 5) {
           cropActions.classList.remove("hidden");
         }
-      }
-    });
-
-    canvasContainer.addEventListener("mouseleave", () => {
-      if (isDrawingMode && isDrawingStroke) {
-        isDrawingStroke = false;
-        ctx.closePath();
-        drawImageOnCanvas();
       }
     });
   }
@@ -848,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCanvas.width = canvas.width;
         downloadCanvas.height = canvas.height;
 
-        downloadCtx.save();
+        downloadCtx.save(); // Save context for transformations
         downloadCtx.translate(
           downloadCanvas.width / 2,
           downloadCanvas.height / 2
@@ -857,10 +825,10 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCtx.rotate((rotationAngle * Math.PI) / 180);
         downloadCtx.drawImage(
           currentImage,
-          -currentImage.width / 2,
-          -currentImage.height / 2
+          -currentImage.naturalWidth / 2, // Use natural dimensions for base image
+          -currentImage.naturalHeight / 2
         );
-        downloadCtx.restore();
+        downloadCtx.restore(); // Restore context after transformations
 
         const imageData = downloadCtx.getImageData(
           0,
