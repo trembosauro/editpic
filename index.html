@@ -5,13 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Pic</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tippy.js for Material Tooltips -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/tippy.js@6/themes/material.css"
-    />
     <link rel="stylesheet" href="style.css" />
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
   </head>
   <body class="min-h-screen">
     <div id="app">
@@ -28,112 +23,52 @@
             class="flex items-center gap-x-3 gap-y-2 flex-wrap"
           >
             <!-- Adjustments -->
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Exposure"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div class="flex flex-col">
+              <label for="exposure" class="text-xs text-text-muted mb-1"
+                >Exposure</label
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z"
-                ></path>
-              </svg>
               <input
                 type="range"
                 id="exposure"
-                title="Exposure"
                 min="0"
                 max="200"
                 value="100"
                 class="w-36 h-1"
               />
             </div>
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Contrast"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+            <div class="flex flex-col">
+              <label for="contrast" class="text-xs text-text-muted mb-1"
+                >Contrast</label
               >
-                <path
-                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM12 4a8 8 0 0 0-8 8 8 8 0 0 0 8 8V4z"
-                />
-              </svg>
               <input
                 type="range"
                 id="contrast"
-                title="Contrast"
                 min="0"
                 max="200"
                 value="100"
                 class="w-36 h-1"
               />
             </div>
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Saturation"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+            <div class="flex flex-col">
+              <label for="saturation" class="text-xs text-text-muted mb-1"
+                >Saturation</label
               >
-                <path
-                  d="M21.2 12c0-5.52-4.48-10-10-10S1.2 6.48 1.2 12s4.48 10 10 10 10-4.48 10-10z"
-                />
-                <path d="M12 2.2V21.8" />
-                <path d="M2.2 12h19.6" />
-              </svg>
               <input
                 type="range"
                 id="saturation"
-                title="Saturation"
                 min="0"
                 max="200"
                 value="100"
                 class="w-36 h-1"
               />
             </div>
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Blur"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+            <div class="flex flex-col">
+              <label for="blur" class="text-xs text-text-muted mb-1"
+                >Blur</label
               >
-                <path
-                  d="M12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z"
-                />
-                <path
-                  d="M12 12a.5.5 0 100-1 .5.5 0 000 1z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M12 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"
-                  fill="currentColor"
-                  opacity=".5"
-                />
-                <path
-                  d="M12 12a4.5 4.5 0 100-9 4.5 4.5 0 000 9z"
-                  fill="currentColor"
-                  opacity=".2"
-                />
-              </svg>
               <input
                 type="range"
                 id="blur"
-                title="Blur"
                 min="0"
                 max="10"
                 step="0.1"
@@ -143,52 +78,26 @@
             </div>
 
             <!-- Highlights and Shadows -->
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Highlights"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+            <div class="flex flex-col">
+              <label for="highlight" class="text-xs text-text-muted mb-1"
+                >Highlights</label
               >
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
               <input
                 type="range"
                 id="highlight"
-                title="Highlights"
                 min="-100"
                 max="100"
                 value="0"
                 class="w-36 h-1"
               />
             </div>
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Shadows"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+            <div class="flex flex-col">
+              <label for="shadow" class="text-xs text-text-muted mb-1"
+                >Shadows</label
               >
-                <path
-                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
-                />
-              </svg>
               <input
                 type="range"
                 id="shadow"
-                title="Shadows"
                 min="-100"
                 max="100"
                 value="0"
@@ -197,67 +106,39 @@
             </div>
 
             <!-- Advanced Filters -->
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Sharpen"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+            <div class="flex flex-col">
+              <label for="sharpen" class="text-xs text-text-muted mb-1"
+                >Sharpen</label
               >
-                <path d="M12 2L2 22h20L12 2z"></path>
-              </svg>
               <input
                 type="range"
                 id="sharpen"
-                title="Sharpen"
                 min="0"
                 max="100"
                 value="0"
                 class="w-36 h-1"
               />
             </div>
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Unblur"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+            <div class="flex flex-col">
+              <label for="unblur" class="text-xs text-text-muted mb-1"
+                >Unblur</label
               >
-                <path d="M12 2L2 22h20L12 2z" opacity="0.6"></path>
-              </svg>
               <input
                 type="range"
                 id="unblur"
-                title="Unblur"
                 min="0"
                 max="100"
                 value="0"
                 class="w-36 h-1"
               />
             </div>
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-text-muted"
-                title="Denoise"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+            <div class="flex flex-col">
+              <label for="denoise" class="text-xs text-text-muted mb-1"
+                >Denoise</label
               >
-                <path
-                  d="M3 3h2v2H3zM7 3h2v2H7zM11 3h2v2h-2zM15 3h2v2h-2zM19 3h2v2h-2zM3 7h2v2H3zM19 7h2v2h-2zM3 11h2v2H3zM19 11h2v2h-2zM3 15h2v2H3zM19 15h2v2h-2zM3 19h2v2H3zM7 19h2v2H7zM11 19h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"
-                ></path>
-              </svg>
               <input
                 type="range"
                 id="denoise"
-                title="Denoise"
                 min="0"
                 max="10"
                 value="0"
@@ -266,35 +147,35 @@
             </div>
 
             <!-- Drawing Controls -->
-            <div class="flex items-center gap-2">
-              <button
-                id="drawModeButton"
-                class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
-                title="Draw"
-                disabled
-              >
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path
-                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2h1l.01.07zm7.43-5.55c-.14.6-.29 1.2-.42 1.79h-3.13l.01-1.92 2.96-2.96.58.58c.3.3.47.7.47 1.13 0 .43-.17.83-.47 1.13zM15.5 4.5l-2.83 2.83 2.83 2.83 2.83-2.83L15.5 4.5z"
-                  />
-                </svg>
-              </button>
-              <input
-                type="color"
-                id="drawingColorPicker"
-                value="#00BCD4"
-                title="Drawing Color"
-                class="w-8 h-8 p-0 border-none rounded-md cursor-pointer"
-              />
-              <input
-                type="range"
-                id="brushSize"
-                title="Brush Size"
-                min="1"
-                max="20"
-                value="5"
-                class="w-36 h-1"
-              />
+            <div class="flex flex-col">
+              <label class="text-xs text-text-muted mb-1">Draw</label>
+              <div class="flex items-center gap-2">
+                <button
+                  id="drawModeButton"
+                  class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                  disabled
+                >
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2h1l.01.07zm7.43-5.55c-.14.6-.29 1.2-.42 1.79h-3.13l.01-1.92 2.96-2.96.58.58c.3.3.47.7.47 1.13 0 .43-.17.83-.47 1.13zM15.5 4.5l-2.83 2.83 2.83 2.83 2.83-2.83L15.5 4.5z"
+                    />
+                  </svg>
+                </button>
+                <input
+                  type="color"
+                  id="drawingColorPicker"
+                  value="#00BCD4"
+                  class="w-8 h-8 p-0 border-none rounded-md cursor-pointer"
+                />
+                <input
+                  type="range"
+                  id="brushSize"
+                  min="1"
+                  max="20"
+                  value="5"
+                  class="w-20 h-1"
+                />
+              </div>
             </div>
 
             <!-- Transformations -->
@@ -454,8 +335,5 @@
         </div>
       </main>
     </div>
-    <!-- Tippy.js Scripts -->
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/tippy.js@6"></script>
   </body>
 </html>

@@ -15,18 +15,6 @@ tailwind.config = {
   },
 };
 document.addEventListener("DOMContentLoaded", () => {
-  // Initialize Tippy.js
-  if (typeof tippy === "function") {
-    tippy("[title]", {
-      content: (reference) => reference.getAttribute("title"),
-      theme: "material",
-      arrow: false,
-      animation: "scale-subtle",
-    });
-  } else {
-    console.error("Tippy.js did not load.");
-  }
-
   const fileInput = document.getElementById("fileInput");
   const canvas = document.getElementById("imageCanvas");
   const ctx = canvas.getContext("2d");
@@ -45,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmCrop = document.getElementById("confirmCrop");
   const cancelCrop = document.getElementById("cancelCrop");
 
-  // Drawing elements
   const drawModeButton = document.getElementById("drawModeButton");
   const drawingColorPicker = document.getElementById("drawingColorPicker");
   const brushSizeSlider = document.getElementById("brushSize");
@@ -70,12 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let cropStartX, cropStartY;
   let cropRect = { x: 0, y: 0, width: 0, height: 0 };
 
-  // Drawing state
   let isDrawingMode = false;
   let drawingColor = "#00BCD4";
   let brushSize = 5;
-  let drawnStrokes = []; // Stores objects like { color: string, size: number, points: [{x,y}, ...] }
-  let isDrawingStroke = false; // To track if a stroke is currently being drawn
+  let drawnStrokes = [];
+  let isDrawingStroke = false;
 
   function buildFilterString() {
     let filter = `brightness(${filterSettings.exposure}%) contrast(${filterSettings.contrast}%) saturate(${filterSettings.saturation}%)`;
@@ -84,8 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return filter;
   }
-
-  // --- Pixel Manipulation Filters ---
 
   function applySharpenFilter(imageData, amount) {
     const data = imageData.data;
@@ -129,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const width = imageData.width;
     const height = imageData.height;
     const outputData = new Uint8ClampedArray(data);
-    const radius = Math.floor(amount / 2); // Simple radius based on amount
+    const radius = Math.floor(amount / 2);
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -166,7 +150,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const unblur = filterSettings.unblur;
     const denoise = filterSettings.denoise;
 
-    // Early exit if no pixel filters are active
     if (
       highlight === 0 &&
       shadow === 0 &&
@@ -174,21 +157,18 @@ document.addEventListener("DOMContentLoaded", () => {
       unblur === 0 &&
       denoise === 0
     ) {
-      return; // No change needed
+      return;
     }
 
-    // Denoise should be applied first as it's a smoothing operation
     if (denoise > 0) {
       applyDenoiseFilter(imageData, denoise);
     }
 
-    // Sharpen and Unblur (they do the same thing, so we can combine their strength)
     const sharpenAmount = Math.max(sharpen, unblur);
     if (sharpenAmount > 0) {
       applySharpenFilter(imageData, sharpenAmount);
     }
 
-    // Apply highlight/shadow adjustments after other pixel ops
     applyHighlightShadow(imageData, highlight, shadow);
   }
 
@@ -199,7 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
       let g = data[i + 1];
       let b = data[i + 2];
 
-      // Apply highlights
       if (highlight !== 0) {
         const factor = highlight / 100;
         r = r + (255 - r) * factor;
@@ -207,7 +186,6 @@ document.addEventListener("DOMContentLoaded", () => {
         b = b + (255 - b) * factor;
       }
 
-      // Apply shadows
       if (shadow !== 0) {
         const factor = shadow / 100;
         r = r * (1 + factor);
@@ -233,13 +211,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const imgWidth = currentImage.naturalWidth || currentImage.width;
     const imgHeight = currentImage.naturalHeight || currentImage.height;
 
-    // Create a temporary canvas to draw the base image
     const tempCanvas = document.createElement("canvas");
     const tempCtx = tempCanvas.getContext("2d");
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
 
-    // Draw image with transformations on temp canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
@@ -254,7 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     ctx.restore();
 
-    // Apply pixel-based filters (Highlights/Shadows)
     if (
       filterSettings.highlight !== 0 ||
       filterSettings.shadow !== 0 ||
@@ -267,14 +242,11 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.putImageData(imageData, 0, 0);
     }
 
-    // Apply CSS-based filters (Exposure, Contrast, etc.)
     applyCssFilters();
 
-    // Redraw strokes over the pixel-adjusted image
     redrawStrokes();
   }
   function redrawStrokes() {
-    // Draw all stored strokes
     drawnStrokes.forEach((stroke) => {
       ctx.beginPath();
       ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
@@ -284,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.strokeStyle = stroke.color;
       ctx.lineWidth = stroke.size;
       ctx.lineCap = "round";
-      ctx.lineJoin = "round"; // Added for smoother corners
+      ctx.lineJoin = "round";
       ctx.stroke();
     });
   }
@@ -314,7 +286,6 @@ document.addEventListener("DOMContentLoaded", () => {
       changeImageButton.style.display = enabled ? "flex" : "none";
 
     if (!enabled) {
-      // If disabling all transformations, also disable drawing mode
       if (isDrawingMode) toggleDrawingMode();
     }
   }
@@ -368,7 +339,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (id === "blur") {
             filterSettings[id] = parseFloat(value);
           } else {
-            // Handles exposure, contrast, saturation, highlight, shadow
             filterSettings[id] = parseInt(value);
           }
           applyCssFilters();
@@ -376,7 +346,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-  // Separate listener for pixel-based filters to trigger a full redraw
   document
     .querySelectorAll("#highlight, #shadow, #sharpen, #unblur, #denoise")
     .forEach((slider) => {
@@ -384,12 +353,11 @@ document.addEventListener("DOMContentLoaded", () => {
         slider.addEventListener("input", (e) => {
           const id = e.target.id;
           filterSettings[id] = parseInt(e.target.value);
-          drawImageOnCanvas(); // These filters require a full canvas redraw
+          drawImageOnCanvas();
         });
       }
     });
 
-  // Event listeners for drawing controls
   if (drawModeButton) {
     drawModeButton.addEventListener("click", toggleDrawingMode);
   }
@@ -408,7 +376,6 @@ document.addEventListener("DOMContentLoaded", () => {
     isDrawingMode = !isDrawingMode;
     if (isDrawingMode) {
       drawModeButton.classList.add("active-transform-button");
-      // Disable cropping mode if active
       if (isCropping) exitCropMode(false);
       canvas.style.cursor = "crosshair";
       updateStatus("Drawing mode activated.");
@@ -417,7 +384,6 @@ document.addEventListener("DOMContentLoaded", () => {
       canvas.style.cursor = "default";
       updateStatus("Drawing mode deactivated.");
     }
-    // Ensure canvas is visible if an image is loaded
     if (currentImage && canvas.classList.contains("hidden")) {
       canvas.classList.remove("hidden");
     }
@@ -460,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (rotateButton) {
     rotateButton.addEventListener("click", () => {
       if (isCropping) exitCropMode(false);
-      if (isDrawingMode) toggleDrawingMode(); // Disable drawing mode if active
+      if (isDrawingMode) toggleDrawingMode();
       if (!currentImage) return;
       rotationAngle = (rotationAngle + 90) % 360;
       redrawImageWithTransformations();
@@ -471,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (flipHorizontalButton) {
     flipHorizontalButton.addEventListener("click", () => {
       if (isCropping) exitCropMode(false);
-      if (isDrawingMode) toggleDrawingMode(); // Disable drawing mode if active
+      if (isDrawingMode) toggleDrawingMode();
       if (!currentImage) return;
       flipH *= -1;
       redrawImageWithTransformations();
@@ -484,7 +450,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (flipVerticalButton) {
     flipVerticalButton.addEventListener("click", () => {
       if (isCropping) exitCropMode(false);
-      if (isDrawingMode) toggleDrawingMode(); // Disable drawing mode if active
+      if (isDrawingMode) toggleDrawingMode();
       if (!currentImage) return;
       flipV *= -1;
       redrawImageWithTransformations();
@@ -522,10 +488,10 @@ document.addEventListener("DOMContentLoaded", () => {
     rotationAngle = 0;
     flipH = 1;
     flipV = 1;
-    drawnStrokes = []; // Clear all drawn strokes
+    drawnStrokes = [];
 
     exitCropMode(false);
-    if (isDrawingMode) toggleDrawingMode(); // Exit drawing mode
+    if (isDrawingMode) toggleDrawingMode();
 
     if (isNewImage) {
       currentImage = null;
@@ -584,7 +550,6 @@ document.addEventListener("DOMContentLoaded", () => {
     cropSelection.style.display = "none";
     cropButton.classList.remove("active-transform-button");
     if (!isDrawingMode) {
-      // Only reset cursor if not in drawing mode
       canvas.style.cursor = "default";
     }
   }
@@ -592,7 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (cropButton) {
     cropButton.addEventListener("click", () => {
       if (!currentImage) return;
-      if (isDrawingMode) toggleDrawingMode(); // Disable drawing mode if active
+      if (isDrawingMode) toggleDrawingMode();
       if (isCropping) return;
       isCropping = true;
       updateStatus("Crop mode activated. Drag to select area.");
@@ -610,7 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
   confirmCrop.addEventListener("click", () => exitCropMode(true));
   cancelCrop.addEventListener("click", () => exitCropMode(false));
 
-  let isDrawing = false; // This variable is for cropping selection
+  let isDrawing = false;
   let startX, startY;
   if (canvasContainer) {
     canvasContainer.addEventListener("mousedown", (e) => {
@@ -699,7 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isDrawingMode && isDrawingStroke) {
         isDrawingStroke = false;
         ctx.closePath();
-        redrawStrokes(); // Just redraw strokes, no need to redraw the whole image
+        redrawStrokes();
       } else if (isCropping && isDrawing) {
         isDrawing = false;
         if (cropRect.width > 5 && cropRect.height > 5) {
@@ -736,7 +701,6 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCanvas.width = canvas.width;
         downloadCanvas.height = canvas.height;
 
-        // 1. Draw the base transformed image
         downloadCtx.save();
         downloadCtx.translate(
           downloadCanvas.width / 2,
@@ -751,7 +715,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         downloadCtx.restore();
 
-        // 2. Apply pixel-based filters (Highlights/Shadows)
         const imageData = downloadCtx.getImageData(
           0,
           0,
@@ -761,11 +724,9 @@ document.addEventListener("DOMContentLoaded", () => {
         applyPixelFilters(imageData);
         downloadCtx.putImageData(imageData, 0, 0);
 
-        // 3. Apply CSS-based filters
         downloadCtx.filter = buildFilterString();
-        downloadCtx.drawImage(downloadCanvas, 0, 0); // Draw canvas onto itself to apply filter
+        downloadCtx.drawImage(downloadCanvas, 0, 0);
 
-        // 4. Draw strokes on top
         drawnStrokes.forEach((stroke) => {
           downloadCtx.beginPath();
           downloadCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
