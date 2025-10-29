@@ -213,23 +213,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function drawImageOnCanvas() {
     if (!currentImage) {
-      // If no image, clear canvas and exit
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       return;
     }
 
-    // Clear the canvas for a fresh redraw
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Save the untransformed state of the context
     ctx.save();
 
-    // Apply transformations (translate, rotate, scale)
-    ctx.translate(canvas.width / 2, canvas.height / 2); // Move origin to center
-    ctx.rotate((rotationAngle * Math.PI) / 180); // Apply rotation
-    ctx.scale(flipH, flipV); // Apply flip
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((rotationAngle * Math.PI) / 180);
+    ctx.scale(flipH, flipV);
 
-    // Draw the currentImage (which is the base image) centered
     ctx.drawImage(
       currentImage,
       -currentImage.naturalWidth / 2,
@@ -238,7 +233,6 @@ document.addEventListener("DOMContentLoaded", () => {
       currentImage.naturalHeight
     );
 
-    // Restore the context to its untransformed state
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.scale(flipH, flipV);
     ctx.rotate((rotationAngle * Math.PI) / 180);
@@ -259,9 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
     applyCssFilters();
 
     redrawStrokes();
-    // Note: Real-time drawing in mousemove directly draws on canvas.
-    // When mouseup calls drawImageOnCanvas, this clears and redraws everything,
-    // effectively "baking" the just-completed stroke into the image state.
   }
   function redrawStrokes() {
     drawnStrokes.forEach((stroke) => {
@@ -296,10 +287,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (flipVerticalButton) flipVerticalButton.disabled = !enabled;
     if (cropButton) cropButton.disabled = !enabled;
     if (drawModeButton) drawModeButton.disabled = !enabled;
-    if (brushSizeSlider) brushSizeSlider.disabled = !enabled; // Brush size slider
-    if (undoButton) undoButton.disabled = !enabled; // Undo button
-    if (redoButton) redoButton.disabled = !enabled; // Redo button
-    if (lightnessSlider) lightnessSlider.disabled = !enabled; // Lightness slider
+    if (brushSizeSlider) brushSizeSlider.disabled = !enabled;
+    if (undoButton) undoButton.disabled = !enabled;
+    if (redoButton) redoButton.disabled = !enabled;
+    if (lightnessSlider) lightnessSlider.disabled = !enabled;
 
     const colorSwatches = document.querySelectorAll(".color-swatch");
     colorSwatches.forEach((swatch) => (swatch.disabled = !enabled));
@@ -308,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
       changeImageButton.style.display = enabled ? "flex" : "none";
 
     if (!enabled) {
-      if (isDrawingMode) toggleDrawingMode(); // This will hide drawing-options
+      if (isDrawingMode) toggleDrawingMode();
     }
 
     if (resetButton) resetButton.disabled = !enabled;
@@ -355,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  document // Event listener for CSS filter sliders
+  document
     .querySelectorAll('#controls input[type="range"]')
     .forEach((slider) => {
       if (slider) {
@@ -372,7 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-  document // Event listener for pixel filter sliders
+  document
     .querySelectorAll("#highlight, #shadow, #sharpen, #unblur, #denoise")
     .forEach((slider) => {
       if (slider) {
@@ -492,7 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
           wrapper.classList.add("active-control");
           slider.classList.remove("hidden");
 
-          // Deactivate other tools
           if (isDrawingMode) toggleDrawingMode();
           if (isCropping) exitCropMode(false);
         }
@@ -506,14 +496,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Function to deactivate all tools (sliders, drawing, crop)
   function deactivateAllTools() {
-    hideAllSliders(); // Hides individual sliders
-    if (isDrawingMode) toggleDrawingMode(); // Hides drawing panel and resets drawing state
-    if (isCropping) exitCropMode(false); // Exits crop mode
+    hideAllSliders();
+    if (isDrawingMode) toggleDrawingMode();
+    if (isCropping) exitCropMode(false);
   }
 
-  // Initial setup for drawing options
   const firstSwatch = document.querySelector(".color-swatch");
   if (firstSwatch) {
     firstSwatch.classList.add("border-primary");
@@ -523,17 +511,12 @@ document.addEventListener("DOMContentLoaded", () => {
       brushSize = parseInt(e.target.value);
     });
   }
-  // End of initial setup
-
-  // Remove redrawImageWithTransformations as it's no longer needed.
-  // Transformations are now handled directly in drawImageOnCanvas.
-  // The transformation buttons will just update the state variables and call drawImageOnCanvas.
 
   function toggleDrawingMode() {
     isDrawingMode = !isDrawingMode;
     if (isDrawingMode) {
-      deactivateAllTools(); // Close other tools before opening this one
-      isDrawingMode = true; // Set it back to true
+      deactivateAllTools();
+      isDrawingMode = true;
       drawModeButton.classList.add("active-transform-button");
       document.getElementById("drawing-options").classList.remove("hidden");
       canvas.style.cursor = "crosshair";
@@ -609,7 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
     drawnStrokes = [];
     redoStrokes = [];
 
-    deactivateAllTools(); // Deactivate all tools
+    deactivateAllTools();
 
     if (isNewImage) {
       currentImage = null;
@@ -664,7 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (apply && cropRect.width > 0 && cropRect.height > 0) {
       applyCrop();
     }
-    if (isDrawingMode) toggleDrawingMode(); // Ensure drawing panel is closed
+    if (isDrawingMode) toggleDrawingMode();
     isCropping = false;
     cropActions.classList.add("hidden");
     cropSelection.style.display = "none";
@@ -676,8 +659,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (cropButton) {
     cropButton.addEventListener("click", () => {
-      if (!currentImage) return; // No image, no crop
-      deactivateAllTools(); // Deactivate all other tools
+      if (!currentImage) return;
+      deactivateAllTools();
       if (isCropping) return;
       isCropping = true;
       updateStatus("Crop mode activated. Drag to select area.");
@@ -800,13 +783,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    // Mouse Events
     canvasContainer.addEventListener("mousedown", handleInteractionStart);
     canvasContainer.addEventListener("mousemove", handleInteractionMove);
     canvasContainer.addEventListener("mouseup", handleInteractionEnd);
-    canvasContainer.addEventListener("mouseleave", handleInteractionEnd); // Handle mouse leaving the canvas
+    canvasContainer.addEventListener("mouseleave", handleInteractionEnd);
 
-    // Touch Events
     canvasContainer.addEventListener("touchstart", handleInteractionStart, {
       passive: false,
     });
@@ -814,7 +795,7 @@ document.addEventListener("DOMContentLoaded", () => {
       passive: false,
     });
     canvasContainer.addEventListener("touchend", handleInteractionEnd);
-    canvasContainer.addEventListener("touchcancel", handleInteractionEnd); // Handle touch interruption
+    canvasContainer.addEventListener("touchcancel", handleInteractionEnd);
   }
 
   if (resetButton) {
@@ -836,7 +817,7 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCanvas.width = canvas.width;
         downloadCanvas.height = canvas.height;
 
-        downloadCtx.save(); // Save context for transformations
+        downloadCtx.save();
         downloadCtx.translate(
           downloadCanvas.width / 2,
           downloadCanvas.height / 2
@@ -845,10 +826,10 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCtx.rotate((rotationAngle * Math.PI) / 180);
         downloadCtx.drawImage(
           currentImage,
-          -currentImage.naturalWidth / 2, // Use natural dimensions for base image
+          -currentImage.naturalWidth / 2,
           -currentImage.naturalHeight / 2
         );
-        downloadCtx.restore(); // Restore context after transformations
+        downloadCtx.restore();
 
         const imageData = downloadCtx.getImageData(
           0,
