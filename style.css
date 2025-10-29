@@ -60,17 +60,17 @@ input[type="range"]::-moz-range-track {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  margin-top: -6px;
-  height: 16px;
-  width: 16px;
+  margin-top: -8px;
+  height: 24px;
+  width: 24px;
   border-radius: 50%;
   background: var(--primary-color);
   box-shadow: 0 0 0 4px var(--card-bg-color);
   transition: background 0.15s ease-in-out;
 }
 input[type="range"]::-moz-range-thumb {
-  height: 16px;
-  width: 16px;
+  height: 24px;
+  width: 24px;
   border-radius: 50%;
   background: var(--primary-color);
   border: none;
@@ -140,7 +140,7 @@ input[type="range"]::-moz-range-thumb {
 .vertical-slider {
   writing-mode: bt-lr; /* bottom to top, left to right */
   -webkit-appearance: slider-vertical !important;
-  width: 8px;
+  width: 16px;
   height: 250px;
 }
 #vertical-tool-panel {
