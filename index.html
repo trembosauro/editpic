@@ -135,6 +135,13 @@
         display: none;
       }
     </style>
+    <style>
+      /* Custom Tippy.js theme overrides */
+      .tippy-box[data-theme~='material'] {
+        background-color: #262626;
+        font-weight: normal;
+      }
+    </style>
     <script>
       tailwind.config = {
         theme: {
@@ -243,11 +250,16 @@
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         // Initialize Tippy.js
-        tippy('[title]', {
-          theme: 'material',
-          arrow: false,
-          animation: 'scale-subtle',
-        });
+        if (typeof tippy === 'function') {
+            tippy('[title]', {
+              content: (reference) => reference.getAttribute('title'),
+              theme: 'material',
+              arrow: false,
+              animation: 'scale-subtle',
+            });
+        } else {
+            console.error('Tippy.js did not load.');
+        }
 
         const fileInput = document.getElementById("fileInput");
         const canvas = document.getElementById("imageCanvas");
@@ -434,6 +446,7 @@
 
         if (rotateButton) {
           rotateButton.addEventListener("click", () => {
+            if (isCropping) exitCropMode(false);
             if (!currentImage) return;
             rotationAngle = (rotationAngle + 90) % 360;
             redrawImageWithTransformations();
@@ -443,6 +456,7 @@
 
         if (flipHorizontalButton) {
           flipHorizontalButton.addEventListener("click", () => {
+            if (isCropping) exitCropMode(false);
             if (!currentImage) return;
             flipH *= -1;
             redrawImageWithTransformations();
@@ -456,6 +470,7 @@
 
         if (flipVerticalButton) {
           flipVerticalButton.addEventListener("click", () => {
+            if (isCropping) exitCropMode(false);
             if (!currentImage) return;
             flipV *= -1;
             redrawImageWithTransformations();
