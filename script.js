@@ -698,23 +698,27 @@ document.addEventListener("DOMContentLoaded", () => {
   let isDrawing = false;
   let startX, startY;
   if (canvasContainer) {
-    canvasContainer.addEventListener("mousedown", (e) => {
+    const handleInteractionStart = (e) => {
       if (!currentImage) return;
+      e.preventDefault();
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
       if (isDrawingMode) {
         isDrawingStroke = true;
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const x = (e.clientX - rect.left) * scaleX;
-        const y = (e.clientY - rect.top) * scaleY;
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
         currentStroke = {
           color: drawingColor,
           size: brushSize,
           points: [{ x, y }],
         };
         drawnStrokes.push(currentStroke);
-        redoStrokes = []; // Clear redo history on new stroke
+        redoStrokes = [];
         updateUndoRedoState();
         ctx.beginPath();
         ctx.moveTo(x, y);
@@ -722,27 +726,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        startX = (e.clientX - rect.left) * scaleX;
-        startY = (e.clientY - rect.top) * scaleY;
+        startX = (clientX - rect.left) * scaleX;
+        startY = (clientY - rect.top) * scaleY;
         isDrawing = true;
         cropSelection.style.display = "block";
         cropActions.classList.add("hidden");
-        cropSelection.style.left = `${e.clientX - rect.left}px`;
-        cropSelection.style.top = `${e.clientY - rect.top}px`;
+        cropSelection.style.left = `${clientX - rect.left}px`;
+        cropSelection.style.top = `${clientY - rect.top}px`;
         cropSelection.style.width = "0px";
         cropSelection.style.height = "0px";
       }
-    });
+    };
 
-    canvasContainer.addEventListener("mousemove", (e) => {
+    const handleInteractionMove = (e) => {
       if (!currentImage) return;
+      e.preventDefault();
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
       if (isDrawingMode && isDrawingStroke) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const x = (e.clientX - rect.left) * scaleX;
-        const y = (e.clientY - rect.top) * scaleY;
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
         currentStroke.points.push({ x, y });
         ctx.lineTo(x, y);
         ctx.strokeStyle = drawingColor;
@@ -753,13 +761,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-        const currentX = (e.clientX - rect.left) * scaleX;
-        const currentY = (e.clientY - rect.top) * scaleY;
+        const currentX = (clientX - rect.left) * scaleX;
+        const currentY = (clientY - rect.top) * scaleY;
         const containerRect = canvasContainer.getBoundingClientRect();
         const startLeft = startX / scaleX + rect.left - containerRect.left;
         const startTop = startY / scaleY + rect.top - containerRect.top;
-        const mouseLeft = e.clientX - containerRect.left;
-        const mouseTop = e.clientY - containerRect.top;
+        const mouseLeft = clientX - containerRect.left;
+        const mouseTop = clientY - containerRect.top;
 
         const selWidth = Math.abs(mouseLeft - startLeft);
         const selHeight = Math.abs(mouseTop - startTop);
@@ -769,24 +777,20 @@ document.addEventListener("DOMContentLoaded", () => {
         cropSelection.style.width = `${selWidth}px`;
         cropSelection.style.height = `${selHeight}px`;
 
-        const width = currentX - startX;
-        const height = currentY - startY;
         cropRect = {
           x: Math.min(startX, currentX),
           y: Math.min(startY, currentY),
-          width: Math.abs(width),
-          height: Math.abs(height),
+          width: Math.abs(currentX - startX),
+          height: Math.abs(currentY - startY),
         };
       }
-    });
+    };
 
-    canvasContainer.addEventListener("mouseup", () => {
+    const handleInteractionEnd = () => {
       if (!currentImage) return;
 
       if (isDrawingMode && isDrawingStroke) {
         isDrawingStroke = false;
-        // The stroke is already drawn on the canvas in real-time.
-        // Now, we just need to bake it into the permanent image state by redrawing everything.
         drawImageOnCanvas();
       } else if (isCropping && isDrawing) {
         isDrawing = false;
@@ -794,7 +798,23 @@ document.addEventListener("DOMContentLoaded", () => {
           cropActions.classList.remove("hidden");
         }
       }
+    };
+
+    // Mouse Events
+    canvasContainer.addEventListener("mousedown", handleInteractionStart);
+    canvasContainer.addEventListener("mousemove", handleInteractionMove);
+    canvasContainer.addEventListener("mouseup", handleInteractionEnd);
+    canvasContainer.addEventListener("mouseleave", handleInteractionEnd); // Handle mouse leaving the canvas
+
+    // Touch Events
+    canvasContainer.addEventListener("touchstart", handleInteractionStart, {
+      passive: false,
     });
+    canvasContainer.addEventListener("touchmove", handleInteractionMove, {
+      passive: false,
+    });
+    canvasContainer.addEventListener("touchend", handleInteractionEnd);
+    canvasContainer.addEventListener("touchcancel", handleInteractionEnd); // Handle touch interruption
   }
 
   if (resetButton) {
