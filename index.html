@@ -236,11 +236,11 @@
 
             <!-- Transformations -->
             <div class="flex items-center gap-2">
-              <button id="cropButton" class="px-2 py-1 text-xs rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Crop</button>
-              <button id="rotateButton" class="px-2 py-1 text-xs rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Rotate 90°</button>
-              <button id="flipHorizontalButton" class="px-2 py-1 text-xs rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Flip H</button>
-              <button id="flipVerticalButton" class="px-2 py-1 text-xs rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Flip V</button>
-              <button id="resetButton" class="px-2 py-1 text-xs rounded-md hover:bg-red-500/20 transition disabled:opacity-50" disabled><span class="text-red-400">Reset</span></button>
+              <button id="cropButton" class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Crop</button>
+              <button id="rotateButton" class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Rotate 90°</button>
+              <button id="flipHorizontalButton" class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Flip H</button>
+              <button id="flipVerticalButton" class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Flip V</button>
+              <button id="resetButton" class="px-3 py-2 text-sm rounded-md hover:bg-red-500/20 transition disabled:opacity-50" disabled><span class="text-red-400">Reset</span></button>
             </div>
           </div>
         </nav>
@@ -637,14 +637,9 @@
           });
         }
 
-        confirmCrop.addEventListener("click", (e) => {
-            e.stopPropagation();
-            exitCropMode(true)
-        });
-        cancelCrop.addEventListener("click", (e) => {
-            e.stopPropagation();
-            exitCropMode(false)
-        });
+        cropActions.addEventListener("mousedown", (e) => e.stopPropagation());
+        confirmCrop.addEventListener("click", () => exitCropMode(true));
+        cancelCrop.addEventListener("click", () => exitCropMode(false));
 
         let isDrawing = false;
         let startX, startY;
