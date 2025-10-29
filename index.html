@@ -85,34 +85,6 @@
         box-shadow: 0 0 0 4px var(--card-bg-color);
         transition: background 0.15s ease-in-out;
       }
-      input[type="checkbox"] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 16px;
-        height: 16px;
-        border: 2px solid var(--text-muted-color);
-        border-radius: 4px;
-        cursor: pointer;
-        background-color: transparent;
-        transition: background-color 0.15s, border-color 0.15s;
-        position: relative;
-        vertical-align: middle;
-        flex-shrink: 0;
-      }
-      input[type="checkbox"]:checked {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-      }
-      input[type="checkbox"]:checked::after {
-        content: "✓";
-        color: var(--primary-text-color);
-        font-size: 12px;
-        line-height: 1;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
       #cropSelection {
         position: absolute;
         border: 2px dashed var(--primary-color);
@@ -128,18 +100,6 @@
         transform: translateX(-50%);
         display: flex;
         gap: 0.5rem;
-      }
-      .vignette-effect::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border-radius: 1.5rem;
-        box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
-        pointer-events: none;
-        z-index: 5;
       }
       .active-transform-button {
         background-color: var(--primary-color) !important;
@@ -198,40 +158,25 @@
         <nav class="flex items-center justify-between flex-wrap gap-3 max-w-7xl mx-auto px-4 sm:px-8">
           <h1 class="text-xl font-extrabold text-primary">Edit Pic</h1>
           
-          <div id="controls" class="flex items-center gap-x-3 gap-y-2 flex-wrap">
+          <div id="controls" class="flex items-center gap-x-4 gap-y-2 flex-wrap">
             <!-- Adjustments -->
-            <div class="flex items-center gap-1" title="Exposure">
-              <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z"></path></svg>
-              <input type="range" id="exposure" min="0" max="200" value="100" class="w-20 h-1"/>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-text-muted" title="Exposure" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z"></path></svg>
+              <input type="range" id="exposure" title="Exposure" min="0" max="200" value="100" class="w-28 h-1"/>
             </div>
-            <div class="flex items-center gap-1" title="Contrast">
-              <svg class="w-4 h-4 text-text-muted" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM12 4a8 8 0 0 0-8 8 8 8 0 0 0 8 8V4z"/></svg>
-              <input type="range" id="contrast" min="0" max="200" value="100" class="w-20 h-1"/>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-text-muted" title="Contrast" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM12 4a8 8 0 0 0-8 8 8 8 0 0 0 8 8V4z"/></svg>
+              <input type="range" id="contrast" title="Contrast" min="0" max="200" value="100" class="w-28 h-1"/>
             </div>
-            <div class="flex items-center gap-1" title="Saturation">
-                <svg class="w-4 h-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 12c0-5.52-4.48-10-10-10S1.2 6.48 1.2 12s4.48 10 10 10 10-4.48 10-10z"/><path d="M12 2.2V21.8"/><path d="M2.2 12h19.6"/></svg>
-              <input type="range" id="saturation" min="0" max="200" value="100" class="w-20 h-1"/>
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-text-muted" title="Saturation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 12c0-5.52-4.48-10-10-10S1.2 6.48 1.2 12s4.48 10 10 10 10-4.48 10-10z"/><path d="M12 2.2V21.8"/><path d="M2.2 12h19.6"/></svg>
+              <input type="range" id="saturation" title="Saturation" min="0" max="200" value="100" class="w-28 h-1"/>
             </div>
-            <div class="flex items-center gap-1" title="Blur">
-                <svg class="w-4 h-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z"/><path d="M12 12a.5.5 0 100-1 .5.5 0 000 1z" fill="currentColor"/><path d="M12 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill="currentColor" opacity=".5"/><path d="M12 12a4.5 4.5 0 100-9 4.5 4.5 0 000 9z" fill="currentColor" opacity=".2"/></svg>
-              <input type="range" id="blur" min="0" max="10" step="0.1" value="0" class="w-20 h-1"/>
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-text-muted" title="Blur" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z"/><path d="M12 12a.5.5 0 100-1 .5.5 0 000 1z" fill="currentColor"/><path d="M12 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill="currentColor" opacity=".5"/><path d="M12 12a4.5 4.5 0 100-9 4.5 4.5 0 000 9z" fill="currentColor" opacity=".2"/></svg>
+              <input type="range" id="blur" title="Blur" min="0" max="10" step="0.1" value="0" class="w-28 h-1"/>
             </div>
             
-            <div class="w-px h-6 bg-border-color mx-2"></div>
-
-            <!-- Effects -->
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1">
-                <input type="checkbox" id="grayscale" /><label for="grayscale" class="text-xs font-medium text-text-color cursor-pointer">Grayscale</label>
-              </div>
-              <div class="flex items-center gap-1">
-                <input type="checkbox" id="sepia" /><label for="sepia" class="text-xs font-medium text-text-color cursor-pointer">Sepia</label>
-              </div>
-              <div class="flex items-center gap-1">
-                <input type="checkbox" id="vignette" /><label for="vignette" class="text-xs font-medium text-text-color cursor-pointer">Vignette</label>
-              </div>
-            </div>
-
             <div class="w-px h-6 bg-border-color mx-2"></div>
 
             <!-- Transformations -->
@@ -323,9 +268,6 @@
           contrast: 100,
           saturation: 100,
           blur: 0,
-          grayscale: false,
-          sepia: false,
-          vignette: false,
         };
         let isCropping = false;
         let cropStartX, cropStartY;
@@ -333,12 +275,6 @@
 
         function buildFilterString() {
           let filter = `brightness(${filterSettings.exposure}%) contrast(${filterSettings.contrast}%) saturate(${filterSettings.saturation}%)`;
-          if (filterSettings.grayscale) {
-            filter += " grayscale(100%)";
-          }
-          if (filterSettings.sepia) {
-            filter += " sepia(100%)";
-          }
           if (filterSettings.blur > 0) {
             filter += ` blur(${filterSettings.blur}px)`;
           }
@@ -349,11 +285,6 @@
           if (currentImage) {
             const filter = buildFilterString();
             canvas.style.filter = filter;
-            if (filterSettings.vignette) {
-              canvasContainer.classList.add("vignette-effect");
-            } else {
-              canvasContainer.classList.remove("vignette-effect");
-            }
           }
         }
 
@@ -455,18 +386,6 @@
             }
           });
 
-        document
-          .querySelectorAll('#controls input[type="checkbox"]')
-          .forEach((checkbox) => {
-            if (checkbox) {
-              checkbox.addEventListener("change", (e) => {
-                const id = e.target.id;
-                filterSettings[id] = e.target.checked;
-                applyCssFilters();
-              });
-            }
-          });
-
         function redrawImageWithTransformations() {
           const tempCanvas = document.createElement("canvas");
           const tempCtx = tempCanvas.getContext("2d");
@@ -543,18 +462,12 @@
           document.getElementById("contrast").value = 100;
           document.getElementById("saturation").value = 100;
           document.getElementById("blur").value = 0;
-          document.getElementById("grayscale").checked = false;
-          document.getElementById("sepia").checked = false;
-          document.getElementById("vignette").checked = false;
 
           Object.assign(filterSettings, {
             exposure: 100,
             contrast: 100,
             saturation: 100,
             blur: 0,
-            grayscale: false,
-            sepia: false,
-            vignette: false,
           });
 
           rotationAngle = 0;
@@ -722,18 +635,6 @@
               downloadCtx.filter = buildFilterString();
               
               downloadCtx.drawImage(canvas, 0, 0);
-
-              if (filterSettings.vignette) {
-                const outerRadius = Math.sqrt(Math.pow(downloadCanvas.width / 2, 2) + Math.pow(downloadCanvas.height / 2, 2));
-                const gradient = downloadCtx.createRadialGradient(
-                  downloadCanvas.width / 2, downloadCanvas.height / 2, downloadCanvas.width / 2 * 0.7,
-                  downloadCanvas.width / 2, downloadCanvas.height / 2, outerRadius
-                );
-                gradient.addColorStop(0, 'rgba(0,0,0,0)');
-                gradient.addColorStop(1, 'rgba(0,0,0,0.9)');
-                downloadCtx.fillStyle = gradient;
-                downloadCtx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
-              }
 
               const link = document.createElement("a");
               link.download = "edited-image.png";
