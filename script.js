@@ -675,6 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   cropActions.addEventListener("mousedown", (e) => e.stopPropagation());
+  cropActions.addEventListener("touchstart", (e) => e.stopPropagation());
   confirmCrop.addEventListener("click", () => exitCropMode(true));
   cancelCrop.addEventListener("click", () => exitCropMode(false));
 
