@@ -34,8 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelCrop = document.getElementById("cancelCrop");
 
   const drawModeButton = document.getElementById("drawModeButton");
-  const drawingColorPicker = document.getElementById("drawingColorPicker");
   const brushSizeSlider = document.getElementById("brushSize");
+  const undoButton = document.getElementById("undoButton");
+  const redoButton = document.getElementById("redoButton");
 
   let currentImage = null;
   let originalImage = null;
@@ -58,9 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let cropRect = { x: 0, y: 0, width: 0, height: 0 };
 
   let isDrawingMode = false;
-  let drawingColor = "#00BCD4";
+  let baseDrawingColor = "#00BCD4";
+  let drawingColor = baseDrawingColor;
   let brushSize = 5;
   let drawnStrokes = [];
+  let redoStrokes = [];
   let isDrawingStroke = false;
 
   function buildFilterString() {
@@ -277,10 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (flipHorizontalButton) flipHorizontalButton.disabled = !enabled;
     if (flipVerticalButton) flipVerticalButton.disabled = !enabled;
     if (cropButton) cropButton.disabled = !enabled;
-    if (resetButton) resetButton.disabled = !enabled;
-    if (downloadButton) downloadButton.disabled = !enabled;
     if (drawModeButton) drawModeButton.disabled = !enabled;
-    if (drawingColorPicker) drawingColorPicker.disabled = !enabled;
     if (brushSizeSlider) brushSizeSlider.disabled = !enabled;
     if (changeImageButton)
       changeImageButton.style.display = enabled ? "flex" : "none";
@@ -288,6 +288,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!enabled) {
       if (isDrawingMode) toggleDrawingMode();
     }
+
+    const drawingOptions = document.getElementById("drawing-options");
+    if (drawingOptions)
+      drawingOptions.style.display = enabled ? "flex" : "none";
+    if (resetButton) resetButton.disabled = !enabled;
+    if (downloadButton) downloadButton.disabled = !enabled;
+    updateUndoRedoState();
   }
 
   if (fileInput) {
@@ -359,12 +366,107 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   if (drawModeButton) {
-    drawModeButton.addEventListener("click", toggleDrawingMode);
-  }
-  if (drawingColorPicker) {
-    drawingColorPicker.addEventListener("input", (e) => {
-      drawingColor = e.target.value;
+    drawModeButton.addEventListener("click", () => {
+      toggleDrawingMode();
+      const drawingOptions = document.getElementById("drawing-options");
+      if (drawingOptions) {
+        drawingOptions.style.display = isDrawingMode ? "flex" : "none";
+      }
     });
+  }
+
+  function hexToRgb(hex) {
+    let r = 0,
+      g = 0,
+      b = 0;
+    if (hex.length == 4) {
+      r = "0x" + hex[1] + hex[1];
+      g = "0x" + hex[2] + hex[2];
+      b = "0x" + hex[3] + hex[3];
+    } else if (hex.length == 7) {
+      r = "0x" + hex[1] + hex[2];
+      g = "0x" + hex[3] + hex[4];
+      b = "0x" + hex[5] + hex[6];
+    }
+    return { r: +r, g: +g, b: +b };
+  }
+
+  function rgbToHex(r, g, b) {
+    r = Math.round(r).toString(16);
+    g = Math.round(g).toString(16);
+    b = Math.round(b).toString(16);
+    if (r.length == 1) r = "0" + r;
+    if (g.length == 1) g = "0" + g;
+    if (b.length == 1) b = "0" + b;
+    return "#" + r + g + b;
+  }
+
+  function adjustLightness(hex, percent) {
+    const { r, g, b } = hexToRgb(hex);
+    const amount = (percent / 100) * 255;
+    const newR = Math.max(0, Math.min(255, r + amount));
+    const newG = Math.max(0, Math.min(255, g + amount));
+    const newB = Math.max(0, Math.min(255, b + amount));
+    return rgbToHex(newR, newG, newB);
+  }
+
+  const colorSwatches = document.querySelectorAll(".color-swatch");
+  colorSwatches.forEach((swatch) => {
+    swatch.addEventListener("click", () => {
+      baseDrawingColor = swatch.dataset.color;
+      document.getElementById("lightnessSlider").value = 0;
+      drawingColor = baseDrawingColor;
+
+      colorSwatches.forEach((s) => s.classList.remove("border-primary"));
+      swatch.classList.add("border-primary");
+    });
+  });
+
+  const lightnessSlider = document.getElementById("lightnessSlider");
+  if (lightnessSlider) {
+    lightnessSlider.addEventListener("input", (e) => {
+      drawingColor = adjustLightness(
+        baseDrawingColor,
+        parseInt(e.target.value)
+      );
+    });
+  }
+
+  function updateUndoRedoState() {
+    if (undoButton) undoButton.disabled = drawnStrokes.length === 0;
+    if (redoButton) redoButton.disabled = redoStrokes.length === 0;
+  }
+
+  if (undoButton) {
+    undoButton.addEventListener("click", () => {
+      if (drawnStrokes.length > 0) {
+        const lastStroke = drawnStrokes.pop();
+        redoStrokes.push(lastStroke);
+        drawImageOnCanvas();
+        updateUndoRedoState();
+      }
+    });
+  }
+
+  if (redoButton) {
+    redoButton.addEventListener("click", () => {
+      if (redoStrokes.length > 0) {
+        const strokeToRedo = redoStrokes.pop();
+        drawnStrokes.push(strokeToRedo);
+        drawImageOnCanvas();
+        updateUndoRedoState();
+      }
+    });
+  }
+
+  // Set initial state for drawing options
+  const initialDrawingOptions = document.getElementById("drawing-options");
+  if (initialDrawingOptions) {
+    initialDrawingOptions.style.display = "none";
+  }
+  const firstSwatch = document.querySelector(".color-swatch");
+  if (firstSwatch) {
+    firstSwatch.classList.add("border-primary");
   }
   if (brushSizeSlider) {
     brushSizeSlider.addEventListener("input", (e) => {
@@ -378,12 +480,15 @@ document.addEventListener("DOMContentLoaded", () => {
       drawModeButton.classList.add("active-transform-button");
       if (isCropping) exitCropMode(false);
       canvas.style.cursor = "crosshair";
+      document.getElementById("drawing-options").style.display = "flex";
       updateStatus("Drawing mode activated.");
     } else {
       drawModeButton.classList.remove("active-transform-button");
       canvas.style.cursor = "default";
+      document.getElementById("drawing-options").style.display = "none";
       updateStatus("Drawing mode deactivated.");
     }
+
     if (currentImage && canvas.classList.contains("hidden")) {
       canvas.classList.remove("hidden");
     }
@@ -489,6 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
     flipH = 1;
     flipV = 1;
     drawnStrokes = [];
+    redoStrokes = [];
 
     exitCropMode(false);
     if (isDrawingMode) toggleDrawingMode();
@@ -507,6 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
       canvas.height = originalImage.height;
       drawImageOnCanvas();
       updateStatus("All edits have been reset.");
+      updateUndoRedoState();
     }
   }
 
@@ -594,6 +701,8 @@ document.addEventListener("DOMContentLoaded", () => {
           points: [{ x, y }],
         };
         drawnStrokes.push(currentStroke);
+        redoStrokes = []; // Clear redo history on new stroke
+        updateUndoRedoState();
         ctx.beginPath();
         ctx.moveTo(x, y);
       } else if (isCropping) {

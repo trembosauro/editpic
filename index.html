@@ -148,33 +148,108 @@
 
             <!-- Drawing Controls -->
             <div class="flex flex-col">
-              <label class="text-xs text-text-muted mb-1">Draw</label>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 mb-2">
                 <button
                   id="drawModeButton"
                   class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
                   disabled
                 >
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2h1l.01.07zm7.43-5.55c-.14.6-.29 1.2-.42 1.79h-3.13l.01-1.92 2.96-2.96.58.58c.3.3.47.7.47 1.13 0 .43-.17.83-.47 1.13zM15.5 4.5l-2.83 2.83 2.83 2.83 2.83-2.83L15.5 4.5z"
-                    />
-                  </svg>
+                  Draw
                 </button>
-                <input
-                  type="color"
-                  id="drawingColorPicker"
-                  value="#00BCD4"
-                  class="w-8 h-8 p-0 border-none rounded-md cursor-pointer"
-                />
-                <input
-                  type="range"
-                  id="brushSize"
-                  min="1"
-                  max="20"
-                  value="5"
-                  class="w-20 h-1"
-                />
+                <button
+                  id="undoButton"
+                  class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                  disabled
+                >
+                  Undo
+                </button>
+                <button
+                  id="redoButton"
+                  class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                  disabled
+                >
+                  Redo
+                </button>
+              </div>
+              <div id="drawing-options" class="flex flex-col gap-2">
+                <div id="color-palette" class="flex flex-wrap gap-2">
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #00bcd4"
+                    data-color="#00BCD4"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #e91e63"
+                    data-color="#E91E63"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #2196f3"
+                    data-color="#2196F3"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #f48fb1"
+                    data-color="#F48FB1"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #000000"
+                    data-color="#000000"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #ffffff"
+                    data-color="#FFFFFF"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #9e9e9e"
+                    data-color="#9E9E9E"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #ffeb3b"
+                    data-color="#FFEB3B"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #ff9800"
+                    data-color="#FF9800"
+                  ></button>
+                  <button
+                    class="color-swatch w-6 h-6 rounded-full border-2 border-transparent"
+                    style="background-color: #9c27b0"
+                    data-color="#9C27B0"
+                  ></button>
+                </div>
+                <div class="flex items-center gap-2">
+                  <label for="lightnessSlider" class="text-xs text-text-muted"
+                    >Lightness</label
+                  >
+                  <input
+                    type="range"
+                    id="lightnessSlider"
+                    min="-50"
+                    max="50"
+                    value="0"
+                    class="w-24 h-1"
+                  />
+                </div>
+                <div class="flex items-center gap-2">
+                  <label for="brushSize" class="text-xs text-text-muted"
+                    >Brush Size</label
+                  >
+                  <input
+                    type="range"
+                    id="brushSize"
+                    min="1"
+                    max="20"
+                    value="5"
+                    class="w-24 h-1"
+                  />
+                </div>
               </div>
             </div>
 
