@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Pic</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tippy.js for Material Tooltips -->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/material.css"/>
     <style>
       :root {
         --primary-color: #00bcd4;
@@ -95,7 +97,7 @@
       }
       #crop-actions {
         position: absolute;
-        bottom: -3rem;
+        bottom: 0.5rem;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
@@ -235,8 +237,18 @@
         </div>
       </main>
     </div>
+    <!-- Tippy.js Scripts -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
+        // Initialize Tippy.js
+        tippy('[title]', {
+          theme: 'material',
+          arrow: false,
+          animation: 'scale-subtle',
+        });
+
         const fileInput = document.getElementById("fileInput");
         const canvas = document.getElementById("imageCanvas");
         const ctx = canvas.getContext("2d");
