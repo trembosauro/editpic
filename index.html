@@ -1,608 +1,719 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Pic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary-color: #00BCD4;
-            --primary-text-color: #121212;
-            --secondary-color: #80CBC4;
-            --dark-bg-color: #121212;
-            --card-bg-color: #1F1F1F;
-            --text-color: #E0E0E0;
-            --text-muted-color: #A0A0A0;
-            --border-color: #333333;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--dark-bg-color);
-            color: var(--text-color);
-        }
-        #canvas-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: var(--card-bg-color);
-            max-width: 100%;
-            height: auto;
-            min-height: 400px;
-            overflow: hidden;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.6);
-        }
-        #imageCanvas {
-            max-width: 100%;
-            max-height: 80vh;
-            display: block;
-            border-radius: 0.75rem;
-            transition: filter 0.3s ease;
-        }
-        #fileInput {
-            display: none;
-        }
-        #fileLabel {
-            cursor: pointer;
-            display: block;
-        }
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-            cursor: pointer;
-            height: 1rem;
-        }
-        input[type="range"]::-webkit-slider-runnable-track {
-            height: 4px;
-            background: var(--border-color);
-            border-radius: 2px;
-        }
-        input[type="range"]::-moz-range-track {
-            height: 4px;
-            background: var(--border-color);
-            border-radius: 2px;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            margin-top: -6px;
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            box-shadow: 0 0 0 4px var(--card-bg-color);
-            transition: background 0.15s ease-in-out;
-        }
-        input[type="range"]::-moz-range-thumb {
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            border: none;
-            box-shadow: 0 0 0 4px var(--card-bg-color);
-            transition: background 0.15s ease-in-out;
-        }
-        input[type="checkbox"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--text-muted-color);
-            border-radius: 4px;
-            cursor: pointer;
-            background-color: transparent;
-            transition: background-color 0.15s, border-color 0.15s;
-            position: relative;
-            vertical-align: middle;
-            flex-shrink: 0;
-        }
-        input[type="checkbox"]:checked {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        input[type="checkbox"]:checked::after {
-            content: '✓';
-            color: var(--primary-text-color);
-            font-size: 14px;
-            line-height: 1;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        #cropSelection {
-            position: absolute;
-            border: 2px dashed var(--primary-color);
-            background-color: rgba(0, 188, 212, 0.2);
-            cursor: move;
-            display: none;
-            z-index: 10;
-        }
-        .vignette-effect::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 1.5rem;
-            box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
-            pointer-events: none;
-            z-index: 5;
-        }
-        #centerUploadArea {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            width: 80%;
-            max-width: 300px;
-            min-height: 180px;
-            border: 2px dashed var(--border-color);
-            border-radius: 1rem;
-            transition: background-color 0.3s ease;
-            padding: 1rem;
-            text-align: center;
-        }
-        #centerUploadArea:hover {
-            background-color: rgba(0, 188, 212, 0.1);
-        }
-        #centerUploadArea.hidden {
-            display: none;
-        }
+      :root {
+        --primary-color: #00bcd4;
+        --primary-text-color: #121212;
+        --secondary-color: #80cbc4;
+        --dark-bg-color: #121212;
+        --card-bg-color: #1f1f1f;
+        --text-color: #e0e0e0;
+        --text-muted-color: #a0a0a0;
+        --border-color: #333333;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--dark-bg-color);
+        color: var(--text-color);
+      }
+      #canvas-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--card-bg-color);
+        max-width: 100%;
+        height: auto;
+        min-height: 400px;
+        overflow: hidden;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.6);
+      }
+      #imageCanvas {
+        max-width: 100%;
+        max-height: 80vh;
+        display: block;
+        border-radius: 0.75rem;
+        transition: filter 0.3s ease;
+      }
+      #fileInput {
+        display: none;
+      }
+      #fileLabel {
+        cursor: pointer;
+        display: block;
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        cursor: pointer;
+        height: 1rem;
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        height: 4px;
+        background: var(--border-color);
+        border-radius: 2px;
+      }
+      input[type="range"]::-moz-range-track {
+        height: 4px;
+        background: var(--border-color);
+        border-radius: 2px;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        margin-top: -6px;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        box-shadow: 0 0 0 4px var(--card-bg-color);
+        transition: background 0.15s ease-in-out;
+      }
+      input[type="range"]::-moz-range-thumb {
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        border: none;
+        box-shadow: 0 0 0 4px var(--card-bg-color);
+        transition: background 0.15s ease-in-out;
+      }
+      input[type="checkbox"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--text-muted-color);
+        border-radius: 4px;
+        cursor: pointer;
+        background-color: transparent;
+        transition: background-color 0.15s, border-color 0.15s;
+        position: relative;
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
+      input[type="checkbox"]:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+      input[type="checkbox"]:checked::after {
+        content: "✓";
+        color: var(--primary-text-color);
+        font-size: 12px;
+        line-height: 1;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #cropSelection {
+        position: absolute;
+        border: 2px dashed var(--primary-color);
+        background-color: rgba(0, 188, 212, 0.2);
+        cursor: move;
+        display: none;
+        z-index: 10;
+      }
+      .vignette-effect::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 1.5rem;
+        box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+        pointer-events: none;
+        z-index: 5;
+      }
+      .active-transform-button {
+        background-color: var(--primary-color) !important;
+        color: var(--primary-text-color) !important;
+        font-weight: bold;
+      }
+      #centerUploadArea {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        width: 80%;
+        max-width: 300px;
+        min-height: 180px;
+        border: 2px dashed var(--border-color);
+        border-radius: 1rem;
+        transition: background-color 0.3s ease;
+        padding: 1rem;
+        text-align: center;
+      }
+      #centerUploadArea:hover {
+        background-color: rgba(0, 188, 212, 0.1);
+      }
+      #centerUploadArea.hidden {
+        display: none;
+      }
     </style>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary': 'var(--primary-color)',
-                        'primary-text': 'var(--primary-text-color)',
-                        'secondary': 'var(--secondary-color)',
-                        'dark-bg': 'var(--dark-bg-color)',
-                        'card-bg': 'var(--card-bg-color)',
-                        'text-color': 'var(--text-color)',
-                        'text-muted': 'var(--text-muted-color)',
-                        'border-color': 'var(--border-color)',
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "var(--primary-color)",
+              "primary-text": "var(--primary-text-color)",
+              secondary: "var(--secondary-color)",
+              "dark-bg": "var(--dark-bg-color)",
+              "card-bg": "var(--card-bg-color)",
+              "text-color": "var(--text-color)",
+              "text-muted": "var(--text-muted-color)",
+              "border-color": "var(--border-color)",
+            },
+          },
+        },
+      };
     </script>
-</head>
-<body class="p-4 sm:p-8 min-h-screen">
-    <div id="app" class="max-w-7xl mx-auto">
-        <header class="mb-10 p-4 bg-card-bg rounded-xl shadow-lg border-b border-border-color">
-            <nav class="flex items-center h-10">
-                <h1 class="text-3xl font-extrabold text-primary">Edit Pic</h1>
-            </nav>
-        </header>
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1 bg-card-bg p-6 rounded-3xl shadow-2xl h-full space-y-8">
-                <h2 class="text-xl font-bold text-text-color">Ajustes Básicos</h2>
-                <div class="space-y-6" id="controls">
-                    <div class="control-group">
-                        <label for="exposure" class="block text-sm font-medium text-text-muted mb-2">Exposição: <span id="exposureValue">100</span>%</label>
-                        <input type="range" id="exposure" min="0" max="200" value="100" class="w-full h-2 bg-border-color rounded-lg appearance-none cursor-pointer">
-                    </div>
-                    <div class="control-group">
-                        <label for="contrast" class="block text-sm font-medium text-text-muted mb-2">Contraste: <span id="contrastValue">100</span>%</label>
-                        <input type="range" id="contrast" min="0" max="200" value="100" class="w-full h-2 bg-border-color rounded-lg appearance-none cursor-pointer">
-                    </div>
-                    <div class="control-group">
-                        <label for="saturation" class="block text-sm font-medium text-text-muted mb-2">Saturação: <span id="saturationValue">100</span>%</label>
-                        <input type="range" id="saturation" min="0" max="200" value="100" class="w-full h-2 bg-border-color rounded-lg appearance-none cursor-pointer">
-                    </div>
-                    <div class="control-group">
-                        <label for="blur" class="block text-sm font-medium text-text-muted mb-2">Desfoque: <span id="blurValue">0.0</span>px</label>
-                        <input type="range" id="blur" min="0" max="10" step="0.1" value="0" class="w-full h-2 bg-border-color rounded-lg appearance-none cursor-pointer">
-                    </div>
-                </div>
-                <h2 class="text-xl font-bold text-text-color pt-8 border-t border-border-color">Efeitos</h2>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between py-2 rounded-lg hover:bg-card-bg/50 transition duration-100">
-                        <label for="grayscale" class="text-base font-medium text-text-color w-full cursor-pointer">Tons de Cinza</label>
-                        <input type="checkbox" id="grayscale">
-                    </div>
-                    <div class="flex items-center justify-between py-2 rounded-lg hover:bg-card-bg/50 transition duration-100">
-                        <label for="sepia" class="text-base font-medium text-text-color w-full cursor-pointer">Sépia</label>
-                        <input type="checkbox" id="sepia">
-                    </div>
-                    <div class="flex items-center justify-between py-2 rounded-lg hover:bg-card-bg/50 transition duration-100">
-                        <label for="vignette" class="text-base font-medium text-text-color w-full cursor-pointer">Vinheta</label>
-                        <input type="checkbox" id="vignette">
-                    </div>
-                </div>
-                <h2 class="text-xl font-bold text-text-color pt-8 border-t border-border-color">Transformações</h2>
-                <div class="space-y-4">
-                    <button id="cropButton" class="w-full text-left py-2 px-4 rounded-lg hover:bg-card-bg/50 transition duration-100 disabled:opacity-50" disabled>
-                        <span class="text-base font-medium text-text-color">Cortar Imagem</span>
-                    </button>
-                    <button id="rotateButton" class="w-full text-left py-2 px-4 rounded-lg hover:bg-card-bg/50 transition duration-100 disabled:opacity-50" disabled>
-                        <span class="text-base font-medium text-text-color">Rotacionar 90°</span>
-                    </button>
-                    <button id="flipHorizontalButton" class="w-full text-left py-2 px-4 rounded-lg hover:bg-card-bg/50 transition duration-100 disabled:opacity-50" disabled>
-                        <span class="text-base font-medium text-text-color">Espelhar Horizontal</span>
-                    </button>
-                    <button id="flipVerticalButton" class="w-full text-left py-2 px-4 rounded-lg hover:bg-card-bg/50 transition duration-100 disabled:opacity-50" disabled>
-                        <span class="text-base font-medium text-text-color">Espelhar Vertical</span>
-                    </button>
-                </div>
+  </head>
+  <body class="min-h-screen">
+    <div id="app">
+      <header class="p-2 bg-card-bg shadow-lg border-b border-border-color sticky top-0 z-50">
+        <nav class="flex items-center justify-between flex-wrap gap-3 max-w-7xl mx-auto px-4 sm:px-8">
+          <h1 class="text-xl font-extrabold text-primary">Edit Pic</h1>
+          
+          <div id="controls" class="flex items-center gap-x-3 gap-y-2 flex-wrap">
+            <!-- Adjustments -->
+            <div class="flex items-center gap-1" title="Exposure">
+              <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z"></path></svg>
+              <input type="range" id="exposure" min="0" max="200" value="100" class="w-20 h-1"/>
             </div>
-            <div class="lg:col-span-2">
-                <div class="bg-card-bg p-6 rounded-3xl h-full flex flex-col items-center">
-                    <input type="file" id="fileInput" accept="image/*">
-                    <div id="canvas-container" class="w-full mb-6">
-                        <canvas id="imageCanvas" class="hidden"></canvas>
-                        <div id="cropSelection"></div>
-                        <label id="centerUploadArea" for="fileInput" class="text-text-color hover:bg-primary/10 transition duration-200">
-                            <svg class="w-12 h-12 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                            <span class="font-bold text-lg text-primary">Carregar Imagem</span>
-                            <span class="text-sm text-text-muted mt-1">Clique ou arraste e solte aqui</span>
-                            <div class="mt-4 pt-4 border-t border-dashed border-border-color w-full text-center">
-                                <span class="text-sm text-text-muted">Nenhuma imagem carregada.</span>
-                            </div>
-                        </label>
-                    </div>
-                    <div class="flex flex-col lg:flex-row gap-4 w-full max-w-sm">
-                        <button id="downloadButton" class="flex-1 bg-secondary hover:opacity-90 transition duration-200 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 text-primary-text flex justify-center items-center" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                        </button>
-                        <button id="changeImageButton" class="flex-1 bg-border-color hover:bg-border-color/80 transition duration-200 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 text-text-color flex justify-center items-center" style="display: none;">
-                            Trocar Imagem
-                        </button>
-                    </div>
-                    <p id="statusMessage" class="text-center text-sm text-text-muted mt-4 h-5"></p>
-                </div>
+            <div class="flex items-center gap-1" title="Contrast">
+              <svg class="w-4 h-4 text-text-muted" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM12 4a8 8 0 0 0-8 8 8 8 0 0 0 8 8V4z"/></svg>
+              <input type="range" id="contrast" min="0" max="200" value="100" class="w-20 h-1"/>
             </div>
-        </main>
+            <div class="flex items-center gap-1" title="Saturation">
+                <svg class="w-4 h-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 12c0-5.52-4.48-10-10-10S1.2 6.48 1.2 12s4.48 10 10 10 10-4.48 10-10z"/><path d="M12 2.2V21.8"/><path d="M2.2 12h19.6"/></svg>
+              <input type="range" id="saturation" min="0" max="200" value="100" class="w-20 h-1"/>
+            </div>
+            <div class="flex items-center gap-1" title="Blur">
+                <svg class="w-4 h-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z"/><path d="M12 12a.5.5 0 100-1 .5.5 0 000 1z" fill="currentColor"/><path d="M12 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill="currentColor" opacity=".5"/><path d="M12 12a4.5 4.5 0 100-9 4.5 4.5 0 000 9z" fill="currentColor" opacity=".2"/></svg>
+              <input type="range" id="blur" min="0" max="10" step="0.1" value="0" class="w-20 h-1"/>
+            </div>
+            
+            <div class="w-px h-6 bg-border-color mx-2"></div>
+
+            <!-- Effects -->
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1">
+                <input type="checkbox" id="grayscale" /><label for="grayscale" class="text-xs font-medium text-text-color cursor-pointer">Grayscale</label>
+              </div>
+              <div class="flex items-center gap-1">
+                <input type="checkbox" id="sepia" /><label for="sepia" class="text-xs font-medium text-text-color cursor-pointer">Sepia</label>
+              </div>
+              <div class="flex items-center gap-1">
+                <input type="checkbox" id="vignette" /><label for="vignette" class="text-xs font-medium text-text-color cursor-pointer">Vignette</label>
+              </div>
+            </div>
+
+            <div class="w-px h-6 bg-border-color mx-2"></div>
+
+            <!-- Transformations -->
+            <div class="flex items-center gap-2">
+              <button id="cropButton" class="px-2 py-1 text-xs rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Crop</button>
+              <button id="rotateButton" class="px-2 py-1 text-xs rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Rotate 90°</button>
+              <button id="flipHorizontalButton" class="px-2 py-1 text-xs rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Flip H</button>
+              <button id="flipVerticalButton" class="px-2 py-1 text-xs rounded-md hover:bg-primary/20 transition disabled:opacity-50" disabled>Flip V</button>
+              <button id="resetButton" class="px-2 py-1 text-xs rounded-md hover:bg-red-500/20 transition disabled:opacity-50" disabled><span class="text-red-400">Reset</span></button>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <main class="max-w-7xl mx-auto p-4 sm:p-8">
+        <div>
+          <div class="bg-card-bg p-6 rounded-3xl h-full flex flex-col items-center">
+            <input type="file" id="fileInput" accept="image/*" />
+            <div id="canvas-container" class="w-full mb-6">
+              <canvas id="imageCanvas" class="hidden"></canvas>
+              <div id="cropSelection"></div>
+              <label id="centerUploadArea" for="fileInput" class="text-text-color hover:bg-primary/10 transition duration-200">
+                <svg class="w-12 h-12 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                <span class="font-bold text-lg text-primary">Upload Image</span>
+                <span class="text-sm text-text-muted mt-1">Click or drag & drop here</span>
+                <div class="mt-4 pt-4 border-t border-dashed border-border-color w-full text-center">
+                  <span class="text-sm text-text-muted">No image loaded.</span>
+                </div>
+              </label>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-4 w-full max-w-sm">
+              <button id="changeImageButton" class="flex-1 bg-border-color hover:bg-border-color/80 transition duration-200 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 text-text-color flex justify-center items-center" style="display: none">
+                Change Image
+              </button>
+              <button id="downloadButton" class="flex-1 bg-secondary hover:opacity-90 transition duration-200 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 text-primary-text flex justify-center items-center" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+            </div>
+            <p id="statusMessage" class="text-center text-sm text-text-muted mt-4 h-5"></p>
+          </div>
+        </div>
+      </main>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const fileInput = document.getElementById('fileInput');
-            const canvas = document.getElementById('imageCanvas');
-            const ctx = canvas.getContext('2d');
-            const downloadButton = document.getElementById('downloadButton');
-            const changeImageButton = document.getElementById('changeImageButton');
-            const statusMessage = document.getElementById('statusMessage');
-            const canvasContainer = document.getElementById('canvas-container');
-            const centerUploadArea = document.getElementById('centerUploadArea');
-            const cropButton = document.getElementById('cropButton');
-            const rotateButton = document.getElementById('rotateButton');
-            const flipHorizontalButton = document.getElementById('flipHorizontalButton');
-            const flipVerticalButton = document.getElementById('flipVerticalButton');
-            const cropSelection = document.getElementById('cropSelection');
-            let currentImage = null;
-            let rotationAngle = 0;
-            let flipH = 1;
-            let flipV = 1;
-            const filterSettings = { exposure: 100, contrast: 100, saturation: 100, blur: 0, grayscale: false, sepia: false, vignette: false };
-            let isCropping = false;
-            let cropStartX, cropStartY;
-            let cropRect = { x: 0, y: 0, width: 0, height: 0 };
-            function buildFilterString() {
-                let filter = `brightness(${filterSettings.exposure}%) contrast(${filterSettings.contrast}%) saturation(${filterSettings.saturation}%)`;
-                if (filterSettings.grayscale) {
-                    filter += ' grayscale(100%)';
-                }
-                if (filterSettings.sepia) {
-                    filter += ' sepia(100%)';
-                }
-                if (filterSettings.blur > 0) {
-                    filter += ` blur(${filterSettings.blur}px)`;
-                }
-                return filter;
+      document.addEventListener("DOMContentLoaded", () => {
+        const fileInput = document.getElementById("fileInput");
+        const canvas = document.getElementById("imageCanvas");
+        const ctx = canvas.getContext("2d");
+        const downloadButton = document.getElementById("downloadButton");
+        const changeImageButton = document.getElementById("changeImageButton");
+        const statusMessage = document.getElementById("statusMessage");
+        const canvasContainer = document.getElementById("canvas-container");
+        const centerUploadArea = document.getElementById("centerUploadArea");
+        const cropButton = document.getElementById("cropButton");
+        const rotateButton = document.getElementById("rotateButton");
+        const flipHorizontalButton = document.getElementById(
+          "flipHorizontalButton"
+        );
+        const flipVerticalButton =
+          document.getElementById("flipVerticalButton");
+        const cropSelection = document.getElementById("cropSelection");
+        const resetButton = document.getElementById("resetButton");
+        let currentImage = null;
+        let originalImage = null;
+        let rotationAngle = 0;
+        let flipH = 1;
+        let flipV = 1;
+        const filterSettings = {
+          exposure: 100,
+          contrast: 100,
+          saturation: 100,
+          blur: 0,
+          grayscale: false,
+          sepia: false,
+          vignette: false,
+        };
+        let isCropping = false;
+        let cropStartX, cropStartY;
+        let cropRect = { x: 0, y: 0, width: 0, height: 0 };
+        function buildFilterString() {
+          let filter = `brightness(${filterSettings.exposure}%) contrast(${filterSettings.contrast}%) saturate(${filterSettings.saturation}%)`;
+          if (filterSettings.grayscale) {
+            filter += " grayscale(100%)";
+          }
+          if (filterSettings.sepia) {
+            filter += " sepia(100%)";
+          }
+          if (filterSettings.blur > 0) {
+            filter += ` blur(${filterSettings.blur}px)`;
+          }
+          return filter;
+        }
+        function applyCssFilters() {
+          if (currentImage) {
+            const filter = buildFilterString();
+            canvas.style.filter = filter;
+            if (filterSettings.vignette) {
+              canvasContainer.classList.add("vignette-effect");
+            } else {
+              canvasContainer.classList.remove("vignette-effect");
             }
-            function applyCssFilters() {
-                if (currentImage) {
-                    const filter = buildFilterString();
-                    canvas.style.filter = filter;
-                    if (filterSettings.vignette) {
-                        canvasContainer.classList.add('vignette-effect');
-                    } else {
-                        canvasContainer.classList.remove('vignette-effect');
-                    }
-                }
+          }
+        }
+        function drawImageOnCanvas() {
+          if (!currentImage) return;
+          const imgWidth = currentImage.naturalWidth || currentImage.width;
+          const imgHeight = currentImage.naturalHeight || currentImage.height;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.scale(flipH, flipV);
+          ctx.rotate((rotationAngle * Math.PI) / 180);
+          ctx.drawImage(
+            currentImage,
+            -imgWidth / 2,
+            -imgHeight / 2,
+            imgWidth,
+            imgHeight
+          );
+          ctx.restore();
+          applyCssFilters();
+        }
+        let statusTimeout;
+        function updateStatus(message) {
+          if (statusMessage) {
+            statusMessage.textContent = message;
+            clearTimeout(statusTimeout);
+            statusTimeout = setTimeout(() => {
+              if (statusMessage) statusMessage.textContent = "";
+            }, 3000);
+          }
+        }
+        function toggleTransformationButtons(enabled) {
+          if (rotateButton) rotateButton.disabled = !enabled;
+          if (flipHorizontalButton) flipHorizontalButton.disabled = !enabled;
+          if (flipVerticalButton) flipVerticalButton.disabled = !enabled;
+          if (cropButton) cropButton.disabled = !enabled;
+          if (resetButton) resetButton.disabled = !enabled;
+          if (downloadButton) downloadButton.disabled = !enabled;
+          if (changeImageButton)
+            changeImageButton.style.display = enabled ? "flex" : "none";
+        }
+        if (fileInput) {
+          fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (currentImage) {
+              resetAllEdits(true);
             }
-            function drawImageOnCanvas() {
-                if (!currentImage) return;
-                const imgWidth = currentImage.naturalWidth || currentImage.width;
-                const imgHeight = currentImage.naturalHeight || currentImage.height;
+            const reader = new FileReader();
+            reader.onload = function (event) {
+              const img = new Image();
+              img.onload = function () {
+                currentImage = img;
+                originalImage = img; 
+                canvas.width = img.naturalWidth || img.width;
+                canvas.height = img.naturalHeight || img.height;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.save();
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.scale(flipH, flipV);
-                ctx.rotate(rotationAngle * Math.PI / 180);
-                ctx.drawImage(currentImage, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
-                ctx.restore();
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 applyCssFilters();
-            }
-            let statusTimeout;
-            function updateStatus(message) {
-                if (statusMessage) {
-                    statusMessage.textContent = message;
-                    clearTimeout(statusTimeout);
-                    statusTimeout = setTimeout(() => {
-                        if (statusMessage) statusMessage.textContent = '';
-                    }, 3000);
-                }
-            }
-            function toggleTransformationButtons(enabled) {
-                if (rotateButton) rotateButton.disabled = !enabled;
-                if (flipHorizontalButton) flipHorizontalButton.disabled = !enabled;
-                if (flipVerticalButton) flipVerticalButton.disabled = !enabled;
-                if (cropButton) cropButton.disabled = !enabled;
-                if (downloadButton) downloadButton.disabled = !enabled;
-                if (changeImageButton) changeImageButton.style.display = enabled ? 'block' : 'none';
-            }
-            if (fileInput) {
-                fileInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    function resetEditorState() {
-                        if (document.getElementById('exposure')) document.getElementById('exposure').value = 100;
-                        if (document.getElementById('contrast')) document.getElementById('contrast').value = 100;
-                        if (document.getElementById('saturation')) document.getElementById('saturation').value = 100;
-                        if (document.getElementById('blur')) document.getElementById('blur').value = 0;
-                        if (document.getElementById('grayscale')) document.getElementById('grayscale').checked = false;
-                        if (document.getElementById('sepia')) document.getElementById('sepia').checked = false;
-                        if (document.getElementById('vignette')) document.getElementById('vignette').checked = false;
-                        Object.assign(filterSettings, { exposure: 100, contrast: 100, saturation: 100, blur: 0, grayscale: false, sepia: false, vignette: false });
-                        canvas.style.filter = '';
-                        canvasContainer.classList.remove('vignette-effect');
-                        rotationAngle = 0;
-                        flipH = 1;
-                        flipV = 1;
-                        isCropping = false;
-                        cropSelection.style.display = 'none';
-                        currentImage = null;
-                        canvas.classList.add('hidden');
-                        if (centerUploadArea) centerUploadArea.classList.remove('hidden');
-                        toggleTransformationButtons(false);
-                        updateStatus('');
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                    if (currentImage) {
-                         resetEditorState(); 
-                    }
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const img = new Image();
-                        img.onload = function() {
-                            currentImage = img;
-                            canvas.width = img.naturalWidth || img.width;
-                            canvas.height = img.naturalHeight || img.height;
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            applyCssFilters();
-                            toggleTransformationButtons(true);
-                            canvas.classList.remove('hidden');
-                            if (centerUploadArea) centerUploadArea.classList.add('hidden');
-                            updateStatus('Imagem carregada com sucesso.');
-                        };
-                        img.onerror = function() {
-                            updateStatus('Erro ao carregar a imagem.');
-                            toggleTransformationButtons(false);
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-            if (changeImageButton) {
-                changeImageButton.addEventListener('click', () => {
-                    if (fileInput) fileInput.click();
-                });
-            }
-            document.querySelectorAll('#controls input[type="range"]').forEach(slider => {
-                if (slider) {
-                    slider.addEventListener('input', (e) => {
-                        const id = e.target.id;
-                        let value = e.target.value;
-                        if (id === 'blur') {
-                            filterSettings[id] = parseFloat(value);
-                            if (document.getElementById(`${id}Value`)) document.getElementById(`${id}Value`).textContent = parseFloat(value).toFixed(1);
-                        } else {
-                            filterSettings[id] = parseInt(value);
-                            if (document.getElementById(`${id}Value`)) document.getElementById(`${id}Value`).textContent = value;
-                        }
-                        applyCssFilters();
-                    });
-                }
-            });
-            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                if (checkbox) {
-                    checkbox.addEventListener('change', (e) => {
-                        const id = e.target.id;
-                        filterSettings[id] = e.target.checked;
-                        applyCssFilters();
-                    });
-                }
-            });
-            function redrawImageWithTransformations() {
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                const imgWidth = currentImage.naturalWidth || currentImage.width;
-                const imgHeight = currentImage.naturalHeight || currentImage.height;
-                if (rotationAngle === 90 || rotationAngle === 270) {
-                    tempCanvas.width = imgHeight;
-                    tempCanvas.height = imgWidth;
+                toggleTransformationButtons(true);
+                canvas.classList.remove("hidden");
+                if (centerUploadArea) centerUploadArea.classList.add("hidden");
+                updateStatus("Image loaded successfully.");
+              };
+              img.onerror = function () {
+                updateStatus("Error loading image.");
+                toggleTransformationButtons(false);
+              };
+              img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+        if (changeImageButton) {
+          changeImageButton.addEventListener("click", () => {
+            if (fileInput) fileInput.click();
+          });
+        }
+        document
+          .querySelectorAll('#controls input[type="range"]')
+          .forEach((slider) => {
+            if (slider) {
+              slider.addEventListener("input", (e) => {
+                const id = e.target.id;
+                let value = e.target.value;
+                if (id === "blur") {
+                  filterSettings[id] = parseFloat(value);
                 } else {
-                    tempCanvas.width = imgWidth;
-                    tempCanvas.height = imgHeight;
+                  filterSettings[id] = parseInt(value);
                 }
-                tempCtx.save();
-                tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-                tempCtx.scale(flipH, flipV);
-                tempCtx.rotate(rotationAngle * Math.PI / 180);
-                tempCtx.drawImage(currentImage, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight);
-                tempCtx.restore();
-                const newImage = new Image();
-                newImage.onload = () => {
-                    currentImage = newImage;
-                    canvas.width = currentImage.width;
-                    canvas.height = currentImage.height;
-                    drawImageOnCanvas();
-                };
-                newImage.src = tempCanvas.toDataURL();
+                applyCssFilters();
+              });
             }
-            if (rotateButton) {
-                rotateButton.addEventListener('click', () => {
-                    if (!currentImage) return;
-                    rotationAngle = (rotationAngle + 90) % 360;
-                    redrawImageWithTransformations();
-                    updateStatus(`Imagem rotacionada para ${rotationAngle}°`);
-                });
+          });
+        document
+          .querySelectorAll('#controls input[type="checkbox"]')
+          .forEach((checkbox) => {
+            if (checkbox) {
+              checkbox.addEventListener("change", (e) => {
+                const id = e.target.id;
+                filterSettings[id] = e.target.checked;
+                applyCssFilters();
+              });
             }
-            if (flipHorizontalButton) {
-                flipHorizontalButton.addEventListener('click', () => {
-                    if (!currentImage) return;
-                    flipH *= -1;
-                    redrawImageWithTransformations();
-                    updateStatus(flipH === -1 ? 'Imagem espelhada horizontalmente' : 'Espelhamento horizontal removido');
-                });
+          });
+        function redrawImageWithTransformations() {
+          const tempCanvas = document.createElement("canvas");
+          const tempCtx = tempCanvas.getContext("2d");
+          const imgWidth = currentImage.naturalWidth || currentImage.width;
+          const imgHeight = currentImage.naturalHeight || currentImage.height;
+          if (rotationAngle === 90 || rotationAngle === 270) {
+            tempCanvas.width = imgHeight;
+            tempCanvas.height = imgWidth;
+          } else {
+            tempCanvas.width = imgWidth;
+            tempCanvas.height = imgHeight;
+          }
+          tempCtx.save();
+          tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+          tempCtx.scale(flipH, flipV);
+          tempCtx.rotate((rotationAngle * Math.PI) / 180);
+          tempCtx.drawImage(
+            currentImage,
+            -imgWidth / 2,
+            -imgHeight / 2,
+            imgWidth,
+            imgHeight
+          );
+          tempCtx.restore();
+          const newImage = new Image();
+          newImage.onload = () => {
+            currentImage = newImage;
+            canvas.width = currentImage.width;
+            canvas.height = currentImage.height;
+            drawImageOnCanvas();
+          };
+          newImage.src = tempCanvas.toDataURL();
+        }
+        if (rotateButton) {
+          rotateButton.addEventListener("click", () => {
+            if (!currentImage) return;
+            rotationAngle = (rotationAngle + 90) % 360;
+            redrawImageWithTransformations();
+            updateStatus(`Image rotated to ${rotationAngle}°`);
+          });
+        }
+        if (flipHorizontalButton) {
+          flipHorizontalButton.addEventListener("click", () => {
+            if (!currentImage) return;
+            flipH *= -1;
+            redrawImageWithTransformations();
+            updateStatus(
+              flipH === -1
+                ? "Image flipped horizontally"
+                : "Horizontal flip removed"
+            );
+          });
+        }
+        if (flipVerticalButton) {
+          flipVerticalButton.addEventListener("click", () => {
+            if (!currentImage) return;
+            flipV *= -1;
+            redrawImageWithTransformations();
+            updateStatus(
+              flipV === -1
+                ? "Image flipped vertically"
+                : "Vertical flip removed"
+            );
+          });
+        }
+        function resetAllEdits(isNewImage = false) {
+          if (!originalImage && !isNewImage) return;
+
+          document.getElementById("exposure").value = 100;
+          document.getElementById("contrast").value = 100;
+          document.getElementById("saturation").value = 100;
+          document.getElementById("blur").value = 0;
+          document.getElementById("grayscale").checked = false;
+          document.getElementById("sepia").checked = false;
+          document.getElementById("vignette").checked = false;
+
+          Object.assign(filterSettings, {
+            exposure: 100,
+            contrast: 100,
+            saturation: 100,
+            blur: 0,
+            grayscale: false,
+            sepia: false,
+            vignette: false,
+          });
+
+          rotationAngle = 0;
+          flipH = 1;
+          flipV = 1;
+
+          isCropping = false;
+          cropSelection.style.display = "none";
+          cropButton.classList.remove("active-transform-button");
+          canvas.style.cursor = "default";
+
+          if (isNewImage) {
+            currentImage = null;
+            originalImage = null;
+            canvas.classList.add("hidden");
+            if (centerUploadArea) centerUploadArea.classList.remove("hidden");
+            toggleTransformationButtons(false);
+            updateStatus("");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          } else {
+            currentImage = originalImage; 
+            canvas.width = originalImage.width;
+            canvas.height = originalImage.height;
+            drawImageOnCanvas(); 
+            updateStatus("All edits have been reset.");
+          }
+        }
+        function applyCrop() {
+          if (!currentImage || cropRect.width === 0 || cropRect.height === 0) {
+            updateStatus("No valid crop area selected.");
+            return;
+          }
+          const tempCanvas = document.createElement("canvas");
+          const tempCtx = tempCanvas.getContext("2d");
+          tempCanvas.width = cropRect.width;
+          tempCanvas.height = cropRect.height;
+          tempCtx.drawImage(
+            currentImage,
+            cropRect.x,
+            cropRect.y,
+            cropRect.width,
+            cropRect.height,
+            0,
+            0,
+            cropRect.width,
+            cropRect.height
+          );
+          const newImage = new Image();
+          newImage.onload = () => {
+            currentImage = newImage;
+            canvas.width = currentImage.width;
+            canvas.height = currentImage.height;
+            drawImageOnCanvas();
+            updateStatus("Image cropped successfully.");
+            cropSelection.style.display = "none";
+            isCropping = false;
+            cropButton.classList.remove("active-transform-button");
+            canvas.style.cursor = "default";
+          };
+          newImage.src = tempCanvas.toDataURL();
+        }
+        if (cropButton) {
+          cropButton.addEventListener("click", () => {
+            if (!currentImage) return;
+            isCropping = !isCropping;
+            if (isCropping) {
+              updateStatus(
+                "Crop mode activated. Drag to select area."
+              );
+              cropButton.classList.add("active-transform-button");
+              cropSelection.style.display = "block";
+              cropRect = { x: 0, y: 0, width: 0, height: 0 };
+              cropSelection.style.width = "0px";
+              cropSelection.style.height = "0px";
+              cropSelection.style.left = "0px";
+              cropSelection.style.top = "0px";
+              canvas.style.cursor = "crosshair";
+            } else {
+              updateStatus("Crop mode deactivated.");
+              cropButton.classList.remove("active-transform-button");
+              cropSelection.style.display = "none";
+              canvas.style.cursor = "default";
+              if (cropRect.width > 0 && cropRect.height > 0) {
+                applyCrop();
+              }
             }
-            if (flipVerticalButton) {
-                flipVerticalButton.addEventListener('click', () => {
-                    if (!currentImage) return;
-                    flipV *= -1;
-                    redrawImageWithTransformations();
-                    updateStatus(flipV === -1 ? 'Imagem espelhada verticalmente' : 'Espelhamento vertical removido');
-                });
+          });
+        }
+        let isDrawing = false;
+        let startX, startY;
+        if (canvasContainer) {
+          canvasContainer.addEventListener("mousedown", (e) => {
+            if (!isCropping || !currentImage) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            startX = (e.clientX - rect.left) * scaleX;
+            startY = (e.clientY - rect.top) * scaleY;
+            isDrawing = true;
+            cropSelection.style.display = "block";
+            cropSelection.style.left = `${e.clientX - rect.left}px`;
+            cropSelection.style.top = `${e.clientY - rect.top}px`;
+            cropSelection.style.width = "0px";
+            cropSelection.style.height = "0px";
+          });
+          canvasContainer.addEventListener("mousemove", (e) => {
+            if (!isCropping || !isDrawing || !currentImage) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
+            const containerRect = canvasContainer.getBoundingClientRect();
+            const startLeft = startX / scaleX + rect.left - containerRect.left;
+            const startTop = startY / scaleY + rect.top - containerRect.top;
+            const mouseLeft = e.clientX - containerRect.left;
+            const mouseTop = e.clientY - containerRect.top;
+
+            cropSelection.style.left = `${Math.min(startLeft, mouseLeft)}px`;
+            cropSelection.style.top = `${Math.min(startTop, mouseTop)}px`;
+            cropSelection.style.width = `${Math.abs(mouseLeft - startLeft)}px`;
+            cropSelection.style.height = `${Math.abs(mouseTop - startTop)}px`;
+
+            const width = currentX - startX;
+            const height = currentY - startY;
+            cropRect = {
+              x: Math.min(startX, currentX),
+              y: Math.min(startY, currentY),
+              width: Math.abs(width),
+              height: Math.abs(height),
+            };
+          });
+          canvasContainer.addEventListener("mouseup", () => {
+            if (!isCropping || !isDrawing) return;
+            isDrawing = false;
+            updateStatus(
+              'Crop area selected. Click "Crop" again to apply or cancel.'
+            );
+          });
+        }
+        if (resetButton) {
+          resetButton.addEventListener("click", () => {
+            resetAllEdits();
+          });
+        }
+        if (downloadButton) {
+          downloadButton.addEventListener("click", () => {
+            if (!currentImage) {
+              updateStatus("Please load an image first.");
+              return;
             }
-            function applyCrop() {
-                if (!currentImage || cropRect.width === 0 || cropRect.height === 0) {
-                    updateStatus('Nenhuma área válida para corte selecionada.');
-                    return;
-                }
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = cropRect.width;
-                tempCanvas.height = cropRect.height;
-                tempCtx.drawImage(
-                    currentImage,
-                    cropRect.x, cropRect.y, cropRect.width, cropRect.height,
-                    0, 0, cropRect.width, cropRect.height
+            updateStatus("Preparing image for download...");
+            try {
+              const downloadCanvas = document.createElement("canvas");
+              const downloadCtx = downloadCanvas.getContext("2d");
+              downloadCanvas.width = canvas.width;
+              downloadCanvas.height = canvas.height;
+              
+              downloadCtx.filter = buildFilterString();
+              
+              downloadCtx.drawImage(canvas, 0, 0);
+
+              if (filterSettings.vignette) {
+                const outerRadius = Math.sqrt(Math.pow(downloadCanvas.width / 2, 2) + Math.pow(downloadCanvas.height / 2, 2));
+                const gradient = downloadCtx.createRadialGradient(
+                  downloadCanvas.width / 2, downloadCanvas.height / 2, downloadCanvas.width / 2 * 0.7,
+                  downloadCanvas.width / 2, downloadCanvas.height / 2, outerRadius
                 );
-                const newImage = new Image();
-                newImage.onload = () => {
-                    currentImage = newImage;
-                    canvas.width = currentImage.width;
-                    canvas.height = currentImage.height;
-                    drawImageOnCanvas();
-                    updateStatus('Imagem cortada com sucesso.');
-                    cropSelection.style.display = 'none';
-                    isCropping = false;
-                    canvas.style.cursor = 'default';
-                };
-                newImage.src = tempCanvas.toDataURL();
+                gradient.addColorStop(0, 'rgba(0,0,0,0)');
+                gradient.addColorStop(1, 'rgba(0,0,0,0.9)');
+                downloadCtx.fillStyle = gradient;
+                downloadCtx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+              }
+
+              const link = document.createElement("a");
+              link.download = "edited-image.png";
+              link.href = downloadCanvas.toDataURL("image/png");
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              updateStatus("Download started!");
+            } catch (error) {
+              console.error("Download error:", error);
+              updateStatus("Error trying to download the image.");
             }
-            if (cropButton) {
-                cropButton.addEventListener('click', () => {
-                    if (!currentImage) return;
-                    isCropping = !isCropping;
-                    if (isCropping) {
-                        updateStatus('Modo de corte ativado. Arraste para selecionar a área.');
-                        cropSelection.style.display = 'block';
-                        cropRect = { x: 0, y: 0, width: 0, height: 0 };
-                        cropSelection.style.width = '0px';
-                        cropSelection.style.height = '0px';
-                        cropSelection.style.left = '0px';
-                        cropSelection.style.top = '0px';
-                        canvas.style.cursor = 'crosshair';
-                    } else {
-                        updateStatus('Modo de corte desativado.');
-                        cropSelection.style.display = 'none';
-                        canvas.style.cursor = 'default';
-                        if (cropRect.width > 0 && cropRect.height > 0) {
-                            applyCrop();
-                        }
-                    }
-                });
-            }
-            let isDrawing = false;
-            let startX, startY;
-            if (canvasContainer) {
-                canvasContainer.addEventListener('mousedown', (e) => {
-                    if (!isCropping || !currentImage) return;
-                    const rect = canvas.getBoundingClientRect();
-                    const scaleX = canvas.width / rect.width;
-                    const scaleY = canvas.height / rect.height;
-                    startX = (e.clientX - rect.left) * scaleX;
-                    startY = (e.clientY - rect.top) * scaleY;
-                    isDrawing = true;
-                    cropSelection.style.display = 'block';
-                    cropSelection.style.left = `${e.clientX - rect.left}px`;
-                    cropSelection.style.top = `${e.clientY - rect.top}px`;
-                    cropSelection.style.width = '0px';
-                    cropSelection.style.height = '0px';
-                });
-                canvasContainer.addEventListener('mousemove', (e) => {
-                    if (!isCropping || !isDrawing || !currentImage) return;
-                    const rect = canvas.getBoundingClientRect();
-                    const scaleX = canvas.width / rect.width;
-                    const scaleY = canvas.height / rect.height;
-                    const currentX = (e.clientX - rect.left) * scaleX;
-                    const currentY = (e.clientY - rect.top) * scaleY;
-                    const width = currentX - startX;
-                    const height = currentY - startY;
-                    cropSelection.style.left = `${Math.min(startX, currentX) / scaleX}px`;
-                    cropSelection.style.top = `${Math.min(startY, currentY) / scaleY}px`;
-                    cropSelection.style.width = `${Math.abs(width) / scaleX}px`;
-                    cropSelection.style.height = `${Math.abs(height) / scaleY}px`;
-                    cropRect = {
-                        x: Math.min(startX, currentX),
-                        y: Math.min(startY, currentY),
-                        width: Math.abs(width),
-                        height: Math.abs(height)
-                    };
-                });
-                canvasContainer.addEventListener('mouseup', () => {
-                    if (!isCropping || !isDrawing) return;
-                    isDrawing = false;
-                    updateStatus('Área de corte selecionada. Clique em "Cortar Imagem" novamente para aplicar ou cancelar.');
-                });
-            }
-            if (downloadButton) {
-                downloadButton.addEventListener('click', () => {
-                    if (!currentImage) {
-                        updateStatus('Por favor, carregue uma imagem primeiro.');
-                        return;
-                    }
-                    updateStatus('Download iniciado. (Nota: Os efeitos de filtro são aplicados via CSS e não são codificados no arquivo PNG resultante, devido à simplicidade do editor. Para filtros reais, seria necessária manipulação de pixel).');
-                    try {
-                        const link = document.createElement('a');
-                        link.download = 'imagem-editada.png';
-                        link.href = canvas.toDataURL('image/png');
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    } catch (error) {
-                        console.error("Erro durante o download:", error);
-                        updateStatus('Erro ao tentar baixar a imagem.');
-                    }
-                });
-            }
-            window.addEventListener('resize', () => {
-                if (currentImage) {
-                    drawImageOnCanvas();
-                }
-            });
+          });
+        }
+        window.addEventListener("resize", () => {
+          if (currentImage) {
+            drawImageOnCanvas();
+          }
         });
+      });
     </script>
-</body>
+  </body>
 </html>
