@@ -165,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (denoise > 0) {
+      // Only apply if value is set
       applyDenoiseFilter(imageData, denoise);
     }
 
@@ -214,11 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!currentImage) return;
     const imgWidth = currentImage.naturalWidth || currentImage.width;
     const imgHeight = currentImage.naturalHeight || currentImage.height;
-
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d");
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -477,6 +473,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function hideAllSliders() {
+    sliderWrappers.forEach((wrapper) => {
+      wrapper.classList.remove("active-control");
+      const slider = wrapper.querySelector(".adjustable-slider");
+      if (slider) {
+        slider.classList.add("hidden");
+      }
+    });
+  }
+
   const sliderWrappers = document.querySelectorAll(".slider-control-wrapper");
   sliderWrappers.forEach((wrapper) => {
     const label = wrapper.querySelector("label");
@@ -486,19 +492,15 @@ document.addEventListener("DOMContentLoaded", () => {
       label.addEventListener("click", () => {
         const isCurrentlyActive = wrapper.classList.contains("active-control");
 
-        // Hide all other sliders and remove active state
-        sliderWrappers.forEach((otherWrapper) => {
-          otherWrapper.classList.remove("active-control");
-          const otherSlider = otherWrapper.querySelector(".adjustable-slider");
-          if (otherSlider) {
-            otherSlider.classList.add("hidden");
-          }
-        });
+        hideAllSliders();
 
-        // If the clicked one wasn't active, activate it
         if (!isCurrentlyActive) {
           wrapper.classList.add("active-control");
           slider.classList.remove("hidden");
+
+          // Deactivate other tools
+          if (isDrawingMode) toggleDrawingMode();
+          if (isCropping) exitCropMode(false);
         }
       });
     }
@@ -509,6 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isDrawingMode) {
       drawModeButton.classList.add("active-transform-button");
       if (isCropping) exitCropMode(false);
+      hideAllSliders();
       canvas.style.cursor = "crosshair";
       const drawingOptions = document.getElementById("drawing-options");
       if (drawingOptions) drawingOptions.style.display = "flex";
@@ -630,6 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     exitCropMode(false);
     if (isDrawingMode) toggleDrawingMode();
+    hideAllSliders();
 
     if (isNewImage) {
       currentImage = null;
@@ -684,6 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (apply && cropRect.width > 0 && cropRect.height > 0) {
       applyCrop();
     }
+    if (isCropping) hideAllSliders(); // Hide sliders when exiting crop mode
     isCropping = false;
     cropActions.classList.add("hidden");
     cropSelection.style.display = "none";
@@ -697,6 +702,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cropButton.addEventListener("click", () => {
       if (!currentImage) return;
       if (isDrawingMode) toggleDrawingMode();
+      hideAllSliders();
       if (isCropping) return;
       isCropping = true;
       updateStatus("Crop mode activated. Drag to select area.");
@@ -805,7 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isDrawingMode && isDrawingStroke) {
         isDrawingStroke = false;
         ctx.closePath();
-        redrawStrokes();
+        drawImageOnCanvas(); // Redraw the entire canvas to bake in the new stroke with filters
       } else if (isCropping && isDrawing) {
         isDrawing = false;
         if (cropRect.width > 5 && cropRect.height > 5) {
@@ -818,7 +824,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isDrawingMode && isDrawingStroke) {
         isDrawingStroke = false;
         ctx.closePath();
-        redrawStrokes();
+        drawImageOnCanvas();
       }
     });
   }
