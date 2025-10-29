@@ -7,6 +7,7 @@
   --text-color: #e0e0e0;
   --text-muted-color: #a0a0a0;
   --border-color: #333333;
+  --navbar-font-size: 0.875rem; /* Equivalent to text-sm */
 }
 body {
   font-family: "Inter", sans-serif;
@@ -97,6 +98,9 @@ input[type="range"]::-moz-range-thumb {
   background-color: var(--primary-color) !important;
   color: var(--primary-text-color) !important;
   font-weight: bold;
+}
+#controls {
+  font-size: var(--navbar-font-size);
 }
 .slider-control-wrapper.active-control > label {
   color: var(--primary-color);

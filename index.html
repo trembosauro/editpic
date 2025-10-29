@@ -23,10 +23,8 @@
             class="flex items-center gap-x-3 gap-y-2 flex-wrap"
           >
             <!-- Adjustments -->
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="exposure"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="exposure" class="text-text-muted cursor-pointer"
                 >Exposure</label
               >
               <input
@@ -38,10 +36,8 @@
                 class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="contrast"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="contrast" class="text-text-muted cursor-pointer"
                 >Contrast</label
               >
               <input
@@ -53,10 +49,8 @@
                 class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="saturation"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="saturation" class="text-text-muted cursor-pointer"
                 >Saturation</label
               >
               <input
@@ -68,10 +62,8 @@
                 class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="blur"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="blur" class="text-text-muted cursor-pointer"
                 >Blur</label
               >
               <input
@@ -86,10 +78,8 @@
             </div>
 
             <!-- Highlights and Shadows -->
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="highlight"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="highlight" class="text-text-muted cursor-pointer"
                 >Highlights</label
               >
               <input
@@ -101,10 +91,8 @@
                 class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="shadow"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="shadow" class="text-text-muted cursor-pointer"
                 >Shadows</label
               >
               <input
@@ -118,10 +106,8 @@
             </div>
 
             <!-- Advanced Filters -->
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="sharpen"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="sharpen" class="text-text-muted cursor-pointer"
                 >Sharpen</label
               >
               <input
@@ -133,10 +119,8 @@
                 class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="unblur"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="unblur" class="text-text-muted cursor-pointer"
                 >Unblur</label
               >
               <input
@@ -148,10 +132,8 @@
                 class="w-36 h-1 adjustable-slider hidden"
               />
             </div>
-            <div class="flex flex-col slider-control-wrapper">
-              <label
-                for="denoise"
-                class="text-xs text-text-muted mb-1 cursor-pointer"
+            <div class="flex items-center gap-2 slider-control-wrapper">
+              <label for="denoise" class="text-text-muted cursor-pointer"
                 >Denoise</label
               >
               <input
@@ -169,21 +151,21 @@
               <div class="flex items-center gap-2 mb-2">
                 <button
                   id="drawModeButton"
-                  class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                  class="px-3 py-2 rounded-md hover:bg-primary/20 transition disabled:opacity-50"
                   disabled
                 >
                   Draw
                 </button>
                 <button
                   id="undoButton"
-                  class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                  class="px-3 py-2 rounded-md hover:bg-primary/20 transition disabled:opacity-50"
                   disabled
                 >
                   Undo
                 </button>
                 <button
                   id="redoButton"
-                  class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                  class="px-3 py-2 rounded-md hover:bg-primary/20 transition disabled:opacity-50"
                   disabled
                 >
                   Redo
@@ -243,7 +225,7 @@
                   ></button>
                 </div>
                 <div class="flex items-center gap-2">
-                  <label for="lightnessSlider" class="text-xs text-text-muted"
+                  <label for="lightnessSlider" class="text-text-muted"
                     >Lightness</label
                   >
                   <input
@@ -256,7 +238,7 @@
                   />
                 </div>
                 <div class="flex items-center gap-2">
-                  <label for="brushSize" class="text-xs text-text-muted"
+                  <label for="brushSize" class="text-text-muted"
                     >Brush Size</label
                   >
                   <input
@@ -275,35 +257,35 @@
             <div class="flex items-center gap-2">
               <button
                 id="cropButton"
-                class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                class="px-3 py-2 rounded-md hover:bg-primary/20 transition disabled:opacity-50"
                 disabled
               >
                 Crop
               </button>
               <button
                 id="rotateButton"
-                class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                class="px-3 py-2 rounded-md hover:bg-primary/20 transition disabled:opacity-50"
                 disabled
               >
                 Rotate 90°
               </button>
               <button
                 id="flipHorizontalButton"
-                class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                class="px-3 py-2 rounded-md hover:bg-primary/20 transition disabled:opacity-50"
                 disabled
               >
                 Flip H
               </button>
               <button
                 id="flipVerticalButton"
-                class="px-3 py-2 text-sm rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                class="px-3 py-2 rounded-md hover:bg-primary/20 transition disabled:opacity-50"
                 disabled
               >
                 Flip V
               </button>
               <button
                 id="resetButton"
-                class="px-3 py-2 text-sm rounded-md hover:bg-red-500/20 transition disabled:opacity-50"
+                class="px-3 py-2 rounded-md hover:bg-red-500/20 transition disabled:opacity-50"
                 disabled
               >
                 <span class="text-red-400">Reset</span>
