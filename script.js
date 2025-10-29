@@ -268,6 +268,39 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function redrawImageWithTransformations() {
+    if (!originalImage) return;
+
+    if (rotationAngle === 90 || rotationAngle === 270) {
+      [canvas.width, canvas.height] = [
+        originalImage.height,
+        originalImage.width,
+      ];
+    } else {
+      [canvas.width, canvas.height] = [
+        originalImage.width,
+        originalImage.height,
+      ];
+    }
+
+    drawImageOnCanvas();
+  }
+  function redrawStrokes() {
+    drawnStrokes.forEach((stroke) => {
+      if (!stroke.points || stroke.points.length === 0) return;
+      ctx.beginPath();
+      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+      for (let i = 1; i < stroke.points.length; i++) {
+        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+      }
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.size;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.stroke();
+    });
+  }
+
   let statusTimeout;
   function updateStatus(message) {
     if (statusMessage) {
@@ -685,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
       deactivateAllTools();
       if (!currentImage) return;
       rotationAngle = (rotationAngle + 90) % 360;
-      drawImageOnCanvas();
+      redrawImageWithTransformations(); // This was missing
       updateStatus(`Image rotated to ${rotationAngle}°`);
     });
   }
@@ -844,7 +877,9 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCtx.drawImage(
           currentImage,
           -currentImage.naturalWidth / 2,
-          -currentImage.naturalHeight / 2
+          -currentImage.naturalHeight / 2,
+          currentImage.naturalWidth,
+          currentImage.naturalHeight
         );
         downloadCtx.restore();
 
