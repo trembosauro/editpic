@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .querySelectorAll("#highlight, #shadow, #sharpen, #unblur, #denoise")
     .forEach((slider) => {
       if (slider) {
-        slider.addEventListener("input", (e) => {
+        slider.addEventListener("change", (e) => {
           const id = e.target.id;
           filterSettings[id] = parseInt(e.target.value);
           drawImageOnCanvas();
