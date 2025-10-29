@@ -33,7 +33,6 @@
         min-height: 400px;
         overflow: hidden;
         border-radius: 1.5rem;
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.6);
       }
       #imageCanvas {
         max-width: 100%;
@@ -121,6 +120,14 @@
         cursor: move;
         display: none;
         z-index: 10;
+      }
+      #crop-actions {
+        position: absolute;
+        bottom: -3rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 0.5rem;
       }
       .vignette-effect::after {
         content: "";
@@ -245,7 +252,16 @@
             <input type="file" id="fileInput" accept="image/*" />
             <div id="canvas-container" class="w-full mb-6">
               <canvas id="imageCanvas" class="hidden"></canvas>
-              <div id="cropSelection"></div>
+              <div id="cropSelection">
+                <div id="crop-actions" class="hidden">
+                  <button id="confirmCrop" class="p-1 bg-green-500 text-white rounded-full hover:bg-green-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  </button>
+                  <button id="cancelCrop" class="p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+                </div>
+              </div>
               <label id="centerUploadArea" for="fileInput" class="text-text-color hover:bg-primary/10 transition duration-200">
                 <svg class="w-12 h-12 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
@@ -293,6 +309,10 @@
           document.getElementById("flipVerticalButton");
         const cropSelection = document.getElementById("cropSelection");
         const resetButton = document.getElementById("resetButton");
+        const cropActions = document.getElementById("crop-actions");
+        const confirmCrop = document.getElementById("confirmCrop");
+        const cancelCrop = document.getElementById("cancelCrop");
+
         let currentImage = null;
         let originalImage = null;
         let rotationAngle = 0;
@@ -310,6 +330,7 @@
         let isCropping = false;
         let cropStartX, cropStartY;
         let cropRect = { x: 0, y: 0, width: 0, height: 0 };
+
         function buildFilterString() {
           let filter = `brightness(${filterSettings.exposure}%) contrast(${filterSettings.contrast}%) saturate(${filterSettings.saturation}%)`;
           if (filterSettings.grayscale) {
@@ -323,6 +344,7 @@
           }
           return filter;
         }
+
         function applyCssFilters() {
           if (currentImage) {
             const filter = buildFilterString();
@@ -334,6 +356,7 @@
             }
           }
         }
+
         function drawImageOnCanvas() {
           if (!currentImage) return;
           const imgWidth = currentImage.naturalWidth || currentImage.width;
@@ -353,6 +376,7 @@
           ctx.restore();
           applyCssFilters();
         }
+
         let statusTimeout;
         function updateStatus(message) {
           if (statusMessage) {
@@ -363,6 +387,7 @@
             }, 3000);
           }
         }
+
         function toggleTransformationButtons(enabled) {
           if (rotateButton) rotateButton.disabled = !enabled;
           if (flipHorizontalButton) flipHorizontalButton.disabled = !enabled;
@@ -373,6 +398,7 @@
           if (changeImageButton)
             changeImageButton.style.display = enabled ? "flex" : "none";
         }
+
         if (fileInput) {
           fileInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
@@ -385,7 +411,7 @@
               const img = new Image();
               img.onload = function () {
                 currentImage = img;
-                originalImage = img; 
+                originalImage = img;
                 canvas.width = img.naturalWidth || img.width;
                 canvas.height = img.naturalHeight || img.height;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -405,11 +431,13 @@
             reader.readAsDataURL(file);
           });
         }
+
         if (changeImageButton) {
           changeImageButton.addEventListener("click", () => {
             if (fileInput) fileInput.click();
           });
         }
+
         document
           .querySelectorAll('#controls input[type="range"]')
           .forEach((slider) => {
@@ -426,6 +454,7 @@
               });
             }
           });
+
         document
           .querySelectorAll('#controls input[type="checkbox"]')
           .forEach((checkbox) => {
@@ -437,6 +466,7 @@
               });
             }
           });
+
         function redrawImageWithTransformations() {
           const tempCanvas = document.createElement("canvas");
           const tempCtx = tempCanvas.getContext("2d");
@@ -470,6 +500,7 @@
           };
           newImage.src = tempCanvas.toDataURL();
         }
+
         if (rotateButton) {
           rotateButton.addEventListener("click", () => {
             if (!currentImage) return;
@@ -478,6 +509,7 @@
             updateStatus(`Image rotated to ${rotationAngle}°`);
           });
         }
+
         if (flipHorizontalButton) {
           flipHorizontalButton.addEventListener("click", () => {
             if (!currentImage) return;
@@ -490,6 +522,7 @@
             );
           });
         }
+
         if (flipVerticalButton) {
           flipVerticalButton.addEventListener("click", () => {
             if (!currentImage) return;
@@ -502,6 +535,7 @@
             );
           });
         }
+
         function resetAllEdits(isNewImage = false) {
           if (!originalImage && !isNewImage) return;
 
@@ -527,10 +561,7 @@
           flipH = 1;
           flipV = 1;
 
-          isCropping = false;
-          cropSelection.style.display = "none";
-          cropButton.classList.remove("active-transform-button");
-          canvas.style.cursor = "default";
+          exitCropMode(false);
 
           if (isNewImage) {
             currentImage = null;
@@ -541,13 +572,14 @@
             updateStatus("");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
           } else {
-            currentImage = originalImage; 
+            currentImage = originalImage;
             canvas.width = originalImage.width;
             canvas.height = originalImage.height;
-            drawImageOnCanvas(); 
+            drawImageOnCanvas();
             updateStatus("All edits have been reset.");
           }
         }
+
         function applyCrop() {
           if (!currentImage || cropRect.width === 0 || cropRect.height === 0) {
             updateStatus("No valid crop area selected.");
@@ -575,40 +607,39 @@
             canvas.height = currentImage.height;
             drawImageOnCanvas();
             updateStatus("Image cropped successfully.");
-            cropSelection.style.display = "none";
-            isCropping = false;
-            cropButton.classList.remove("active-transform-button");
-            canvas.style.cursor = "default";
           };
           newImage.src = tempCanvas.toDataURL();
         }
+
+        function exitCropMode(apply = false) {
+            if (apply && cropRect.width > 0 && cropRect.height > 0) {
+                applyCrop();
+            }
+            isCropping = false;
+            cropActions.classList.add("hidden");
+            cropSelection.style.display = "none";
+            cropButton.classList.remove("active-transform-button");
+            canvas.style.cursor = "default";
+        }
+
         if (cropButton) {
           cropButton.addEventListener("click", () => {
-            if (!currentImage) return;
-            isCropping = !isCropping;
-            if (isCropping) {
-              updateStatus(
-                "Crop mode activated. Drag to select area."
-              );
-              cropButton.classList.add("active-transform-button");
-              cropSelection.style.display = "block";
-              cropRect = { x: 0, y: 0, width: 0, height: 0 };
-              cropSelection.style.width = "0px";
-              cropSelection.style.height = "0px";
-              cropSelection.style.left = "0px";
-              cropSelection.style.top = "0px";
-              canvas.style.cursor = "crosshair";
-            } else {
-              updateStatus("Crop mode deactivated.");
-              cropButton.classList.remove("active-transform-button");
-              cropSelection.style.display = "none";
-              canvas.style.cursor = "default";
-              if (cropRect.width > 0 && cropRect.height > 0) {
-                applyCrop();
-              }
-            }
+            if (!currentImage || isCropping) return;
+            isCropping = true;
+            updateStatus("Crop mode activated. Drag to select area.");
+            cropButton.classList.add("active-transform-button");
+            cropRect = { x: 0, y: 0, width: 0, height: 0 };
+            cropSelection.style.width = "0px";
+            cropSelection.style.height = "0px";
+            cropSelection.style.left = "0px";
+            cropSelection.style.top = "0px";
+            canvas.style.cursor = "crosshair";
           });
         }
+
+        confirmCrop.addEventListener("click", () => exitCropMode(true));
+        cancelCrop.addEventListener("click", () => exitCropMode(false));
+
         let isDrawing = false;
         let startX, startY;
         if (canvasContainer) {
@@ -621,11 +652,13 @@
             startY = (e.clientY - rect.top) * scaleY;
             isDrawing = true;
             cropSelection.style.display = "block";
+            cropActions.classList.add("hidden"); 
             cropSelection.style.left = `${e.clientX - rect.left}px`;
             cropSelection.style.top = `${e.clientY - rect.top}px`;
             cropSelection.style.width = "0px";
             cropSelection.style.height = "0px";
           });
+
           canvasContainer.addEventListener("mousemove", (e) => {
             if (!isCropping || !isDrawing || !currentImage) return;
             const rect = canvas.getBoundingClientRect();
@@ -639,10 +672,13 @@
             const mouseLeft = e.clientX - containerRect.left;
             const mouseTop = e.clientY - containerRect.top;
 
+            const selWidth = Math.abs(mouseLeft - startLeft);
+            const selHeight = Math.abs(mouseTop - startTop);
+
             cropSelection.style.left = `${Math.min(startLeft, mouseLeft)}px`;
             cropSelection.style.top = `${Math.min(startTop, mouseTop)}px`;
-            cropSelection.style.width = `${Math.abs(mouseLeft - startLeft)}px`;
-            cropSelection.style.height = `${Math.abs(mouseTop - startTop)}px`;
+            cropSelection.style.width = `${selWidth}px`;
+            cropSelection.style.height = `${selHeight}px`;
 
             const width = currentX - startX;
             const height = currentY - startY;
@@ -653,19 +689,22 @@
               height: Math.abs(height),
             };
           });
+
           canvasContainer.addEventListener("mouseup", () => {
             if (!isCropping || !isDrawing) return;
             isDrawing = false;
-            updateStatus(
-              'Crop area selected. Click "Crop" again to apply or cancel.'
-            );
+            if (cropRect.width > 5 && cropRect.height > 5) {
+                cropActions.classList.remove("hidden");
+            }
           });
         }
+
         if (resetButton) {
           resetButton.addEventListener("click", () => {
             resetAllEdits();
           });
         }
+
         if (downloadButton) {
           downloadButton.addEventListener("click", () => {
             if (!currentImage) {
@@ -708,6 +747,7 @@
             }
           });
         }
+
         window.addEventListener("resize", () => {
           if (currentImage) {
             drawImageOnCanvas();
