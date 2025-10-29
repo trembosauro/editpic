@@ -1,67 +1,67 @@
-📸 Edit Pic - Minimalist Web Image Editor
+# 📸 Edit Pic - Editor de Imagens Minimalista para Web
 
-Edit Pic is a lightweight and minimalist web photo editor designed to perform basic image adjustments and transformations quickly and intuitively. The project adheres to modern design principles, utilizing a Dark Mode aesthetic inspired by Material Design 3 (M3).
+**Edit Pic** é um editor de imagens leve e minimalista para a web, projetado para realizar ajustes e transformações de forma rápida e intuitiva. O projeto foi desenvolvido como um arquivo único, sem dependências de backend ou ferramentas de compilação complexas, ideal para uso rápido e demonstração.
 
-Developed as a single-file project, it requires no backend dependencies or complex build tools, making it ideal for quick use and demonstration.
+---
 
-✨ Features
+## ✨ Funcionalidades
 
-The editor offers a set of essential tools for image editing:
+O editor oferece um conjunto de ferramentas essenciais para edição de imagens, organizadas de forma intuitiva.
 
-Basic Adjustments (CSS Filters)
+### 🎨 Ajustes
 
-Exposure: Controls the overall brightness of the image.
+- **✨ Exposure (Exposição):** Controla o brilho geral da imagem.
+- **🌗 Contrast (Contraste):** Aumenta ou diminui a diferença tonal.
+- **🌈 Saturation (Saturação):** Ajusta a intensidade das cores.
+- **💧 Blur (Desfoque):** Aplica um efeito de desfoque gaussiano.
+- **☀️ Highlights (Realces):** Ajusta as áreas mais claras da imagem.
+- **🌙 Shadows (Sombras):** Ajusta as áreas mais escuras da imagem.
+- **🔪 Sharpen (Nitidez):** Aumenta a nitidez dos detalhes.
+- **🧼 Unblur (Remover Desfoque):** Tenta reverter o desfoque da imagem.
+- **🧽 Denoise (Redução de Ruído):** Suaviza o ruído e a granulação.
 
-Contrast: Increases or decreases the tonal difference.
+### 🖌️ Desenho
 
-Saturation: Adjusts the intensity of colors.
+- **🎨 Paleta de Cores:** Selecione entre cores pré-definidas (ciano, magenta, azul, etc.).
+- **💡 Lightness (Luminosidade):** Clareia ou escurece a cor de desenho selecionada.
+- **✒️ Brush Size (Tamanho do Pincel):** Ajusta a espessura do traço.
+- **↩️ Undo/Redo (Desfazer/Refazer):** Volte ou avance nos traços de desenho.
 
-Blur: Applies a blurring effect to the image.
+### ✂️ Transformações
 
-Effects (Toggles)
+- **🔄 Rotate 90° (Girar 90°):** Rotaciona a imagem em incrementos de 90 graus.
+- **↔️ Flip Horizontal:** Espelha a imagem horizontalmente.
+- **↕️ Flip Vertical:** Espelha a imagem verticalmente.
+- **🔳 Crop (Cortar):** Permite selecionar uma área da imagem para recorte.
 
-Grayscale: Converts the image to black and white.
+### ⚙️ Ações
 
-Sepia: Applies a classic sepia filter.
+- **🔄 Reset:** Remove todas as edições e volta a imagem ao seu estado original.
+- **📥 Download:** Baixa a imagem com todas as edições aplicadas.
 
-Vignette: Simulates the darkening of the borders, focusing attention on the center.
+## 🖼️ Interface
 
-Transformations (Canvas API)
+A interface segue os princípios do Material Design 3 (M3) com um tema escuro para reduzir o cansaço visual.
 
-Crop Image: Allows you to select an area of the image with the mouse for cropping.
+_(Adicione aqui uma captura de tela da interface do editor)_
 
-Rotate 90°: Rotates the image in 90-degree increments.
+![Interface do Edit Pic](placeholder_para_screenshot.png)
 
-Flip Horizontal/Vertical: Flips the image along its respective axes.
+## 🚀 Como Executar
 
-🎨 Design and Aesthetics
+Este projeto é um arquivo único (`.html`) e pode ser executado diretamente em qualquer navegador moderno.
 
-"Edit Pic" was developed with a focus on Material Design 3 (M3) principles, featuring:
+1.  **Baixe os arquivos:** Faça o download de `index.html`, `script.js` e `style.css`.
+2.  **Abra no Navegador:** Dê um duplo clique no arquivo `index.html`.
+3.  **Comece a Editar:** Clique na área central para carregar uma imagem e comece a usar os controles.
 
-Consistent Dark Mode: A dark color palette to reduce eye strain.
+## 🛠️ Tecnologias Utilizadas
 
-Primary Color: Cyan (#00BCD4) used for action elements and highlights.
+- **HTML5:** Estrutura base da aplicação.
+- **Tailwind CSS:** Framework utility-first para estilização rápida e responsiva.
+- **JavaScript (ES6+):** Lógica do editor, manipulação do Canvas e gerenciamento dos filtros.
 
-Accessibility: Large touch targets (> 48px) and 8pt-grid spacing for optimal mobile usability.
+## 📝 Nota Importante
 
-M3 Components: Sliders and checkboxes styled for a modern and clean look.
-
-🚀 How to Run
-
-This project is a single file (.html) and can be run directly in any modern web browser.
-
-Download the file: Download the photo_editor.html file to your computer.
-
-Open in Browser: Double-click the photo_editor.html file.
-
-Start Editing: Click the "Carregar Imagem" (Load Image) button in the central area to select a photo and begin using the controls.
-
-Note: Transformations (Crop, Rotation, Flip) modify the actual image pixels on the Canvas. Adjustments (Filters) are applied via CSS in the browser and, for code simplicity, are not encoded into the final downloaded image file.
-
-🛠️ Technologies Used
-
-HTML5: Base structure.
-
-Tailwind CSS: Utility-first framework for quick and responsive styling.
-
-JavaScript (ES6+): Editor logic, Canvas manipulation, and filter management.
+- **Ajustes vs. Transformações:** Filtros como Exposição, Contraste e Saturação são aplicados via CSS para uma pré-visualização rápida. Todos os outros filtros (Realces, Sombras, Nitidez) e transformações (Girar, Cortar, Desenhar) manipulam diretamente os pixels da imagem no Canvas.
+- **Download:** Ao baixar a imagem, todos os filtros e transformações são "cozinhados" na imagem final, garantindo que o resultado seja exatamente o que você vê na tela.
