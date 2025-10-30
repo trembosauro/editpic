@@ -86,6 +86,13 @@
                   >Denoise</label
                 >
               </div>
+              <button
+                id="textModeButton"
+                class="px-3 py-3 rounded-md hover:bg-primary/20 transition disabled:opacity-50"
+                disabled
+              >
+                Text
+              </button>
 
               <!-- Drawing Controls -->
               <button
@@ -243,7 +250,20 @@
                 id="drawing-options"
                 class="hidden w-full flex items-center gap-x-3 gap-y-2 flex-wrap bg-card-bg p-3 rounded-lg shadow-lg border border-border-color"
               >
-                <div id="color-palette" class="flex flex-wrap gap-2 p-1">
+                <div class="flex items-center gap-2">
+                  <label for="brushSize" class="text-text-muted"
+                    >Brush Size</label
+                  >
+                  <input
+                    type="range"
+                    id="brushSize"
+                    min="1"
+                    max="20"
+                    value="7"
+                    class="w-24 h-1"
+                  />
+                </div>
+                <div class="flex flex-wrap gap-2 p-1">
                   <button
                     class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
                     style="background-color: #00bcd4"
@@ -295,31 +315,84 @@
                     data-color="#9C27B0"
                   ></button>
                 </div>
+              </div>
+
+              <!-- Text Options Panel -->
+              <div
+                id="text-options"
+                class="hidden w-full flex items-center gap-x-3 gap-y-2 flex-wrap bg-card-bg p-3 rounded-lg shadow-lg border border-border-color"
+              >
                 <div class="flex items-center gap-2">
-                  <label for="lightnessSlider" class="text-text-muted"
-                    >Lightness</label
-                  >
+                  <label for="textInput" class="text-text-muted">Text:</label>
                   <input
-                    type="range"
-                    id="lightnessSlider"
-                    min="-50"
-                    max="50"
-                    value="0"
-                    class="w-24 h-1"
+                    type="text"
+                    id="textInput"
+                    placeholder="Enter text here..."
+                    class="bg-border-color rounded px-2 py-1 text-text-color focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div class="flex items-center gap-2">
-                  <label for="brushSize" class="text-text-muted"
-                    >Brush Size</label
+                  <label for="fontSize" class="text-text-muted"
+                    >Font Size:</label
                   >
                   <input
-                    type="range"
-                    id="brushSize"
-                    min="1"
-                    max="20"
-                    value="7"
-                    class="w-24 h-1"
+                    type="number"
+                    id="fontSize"
+                    value="48"
+                    class="w-20 bg-border-color rounded px-2 py-1 text-text-color focus:outline-none focus:ring-2 focus:ring-primary"
                   />
+                </div>
+                <div class="flex flex-wrap gap-2 p-1">
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #00bcd4"
+                    data-color="#00BCD4"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #e91e63"
+                    data-color="#E91E63"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #2196f3"
+                    data-color="#2196F3"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #f48fb1"
+                    data-color="#F48FB1"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #000000"
+                    data-color="#000000"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #ffffff"
+                    data-color="#FFFFFF"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #9e9e9e"
+                    data-color="#9E9E9E"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #ffeb3b"
+                    data-color="#FFEB3B"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #ff9800"
+                    data-color="#FF9800"
+                  ></button>
+                  <button
+                    class="color-swatch w-8 h-8 rounded-full border-2 border-transparent"
+                    style="background-color: #9c27b0"
+                    data-color="#9C27B0"
+                  ></button>
                 </div>
               </div>
             </div>

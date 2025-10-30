@@ -38,6 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const undoButton = document.getElementById("undoButton");
   const redoButton = document.getElementById("redoButton");
   const lightnessSlider = document.getElementById("lightnessSlider");
+  const textModeButton = document.getElementById("textModeButton");
+  const textInput = document.getElementById("textInput");
+  const fontSizeInput = document.getElementById("fontSize");
 
   let currentImage = null;
   let originalImage = null;
@@ -63,9 +66,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let baseDrawingColor = "#00BCD4";
   let drawingColor = baseDrawingColor;
   let brushSize = 7;
-  let drawnStrokes = [];
-  let redoStrokes = [];
   let isDrawingStroke = false;
+  let isTextMode = false;
+  let historyStack = [];
+  let redoStack = [];
+  let isMovingText = false;
+  let movingTextElement = null;
+  let textMoveOffsetX, textMoveOffsetY;
 
   function buildFilterString() {
     let filter = `brightness(${filterSettings.exposure}%) contrast(${filterSettings.contrast}%) saturate(${filterSettings.saturation}%)`;
@@ -213,28 +220,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function drawImageOnCanvas() {
-    if (!currentImage) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      return;
-    }
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.save();
-
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((rotationAngle * Math.PI) / 180);
-    ctx.scale(flipH, flipV);
-
-    ctx.drawImage(
-      currentImage,
-      -currentImage.naturalWidth / 2,
-      -currentImage.naturalHeight / 2,
-      currentImage.naturalWidth,
-      currentImage.naturalHeight
-    );
-
-    ctx.restore();
+    if (currentImage) {
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((rotationAngle * Math.PI) / 180);
+      ctx.scale(flipH, flipV);
+      ctx.drawImage(
+        currentImage,
+        -currentImage.naturalWidth / 2,
+        -currentImage.naturalHeight / 2,
+        currentImage.naturalWidth,
+        currentImage.naturalHeight
+      );
+      ctx.restore();
+    } else {
+      return;
+    }
 
     if (
       filterSettings.highlight !== 0 ||
@@ -251,21 +254,75 @@ document.addEventListener("DOMContentLoaded", () => {
     applyCssFilters();
 
     redrawStrokes();
+    redrawText();
   }
   function redrawStrokes() {
-    drawnStrokes.forEach((stroke) => {
-      if (!stroke.points || stroke.points.length === 0) return;
-      ctx.beginPath();
-      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-      for (let i = 1; i < stroke.points.length; i++) {
-        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+    historyStack.forEach((action) => {
+      if (action.type === "draw") {
+        const stroke = action.data;
+        if (!stroke.points || stroke.points.length === 0) return;
+        ctx.beginPath();
+        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        for (let i = 1; i < stroke.points.length; i++) {
+          ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+        }
+        ctx.strokeStyle = stroke.color;
+        ctx.lineWidth = stroke.size;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.stroke();
       }
-      ctx.strokeStyle = stroke.color;
-      ctx.lineWidth = stroke.size;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.stroke();
     });
+  }
+
+  function redrawText() {
+    historyStack.forEach((action) => {
+      if (action.type === "text") {
+        const textEl = action.data;
+        ctx.font = `${textEl.size}px Inter`;
+        ctx.fillStyle = textEl.color;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(textEl.text, textEl.x, textEl.y);
+      }
+    });
+  }
+
+  function getTextElementAt(x, y) {
+    for (let i = historyStack.length - 1; i >= 0; i--) {
+      const action = historyStack[i];
+      if (action.type === "text") {
+        const textEl = action.data;
+        ctx.font = `${textEl.size}px Inter`;
+        const textMetrics = ctx.measureText(textEl.text);
+        const textWidth = textMetrics.width;
+        const textHeight = parseInt(textEl.size);
+
+        const textX = textEl.x - textWidth / 2;
+        const textY = textEl.y - textHeight / 2;
+
+        if (
+          x >= textX &&
+          x <= textX + textWidth &&
+          y >= textY &&
+          y <= textY + textHeight
+        ) {
+          return action;
+        }
+      }
+    }
+    return null;
+  }
+
+  let statusTimeout;
+  function updateStatus(message) {
+    if (statusMessage) {
+      statusMessage.textContent = message;
+      clearTimeout(statusTimeout);
+      statusTimeout = setTimeout(() => {
+        if (statusMessage) statusMessage.textContent = "";
+      }, 3000);
+    }
   }
 
   function redrawImageWithTransformations() {
@@ -285,32 +342,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     drawImageOnCanvas();
   }
-  function redrawStrokes() {
-    drawnStrokes.forEach((stroke) => {
-      if (!stroke.points || stroke.points.length === 0) return;
-      ctx.beginPath();
-      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-      for (let i = 1; i < stroke.points.length; i++) {
-        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
-      }
-      ctx.strokeStyle = stroke.color;
-      ctx.lineWidth = stroke.size;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.stroke();
-    });
-  }
-
-  let statusTimeout;
-  function updateStatus(message) {
-    if (statusMessage) {
-      statusMessage.textContent = message;
-      clearTimeout(statusTimeout);
-      statusTimeout = setTimeout(() => {
-        if (statusMessage) statusMessage.textContent = "";
-      }, 3000);
-    }
-  }
 
   function toggleTransformationButtons(enabled) {
     if (rotateButton) rotateButton.disabled = !enabled;
@@ -319,6 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cropButton) cropButton.disabled = !enabled;
     if (drawModeButton) drawModeButton.disabled = !enabled;
     if (brushSizeSlider) brushSizeSlider.disabled = !enabled;
+    if (textModeButton) textModeButton.disabled = !enabled;
     if (undoButton) undoButton.disabled = !enabled;
     if (redoButton) redoButton.disabled = !enabled;
     if (lightnessSlider) lightnessSlider.disabled = !enabled;
@@ -331,6 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!enabled) {
       if (isDrawingMode) toggleDrawingMode();
+      if (isTextMode) toggleTextMode();
     }
 
     if (resetButton) resetButton.disabled = !enabled;
@@ -444,12 +477,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const colorSwatches = document.querySelectorAll(".color-swatch");
   colorSwatches.forEach((swatch) => {
     swatch.addEventListener("click", () => {
+      if (swatch.disabled) return;
       baseDrawingColor = swatch.dataset.color;
-      document.getElementById("lightnessSlider").value = 0;
+      // This might not exist if we are not in drawing mode, so check for it
+      const lightnessSlider = document.getElementById("lightnessSlider");
+      if (lightnessSlider) lightnessSlider.value = 0;
       drawingColor = baseDrawingColor;
 
-      colorSwatches.forEach((s) => s.classList.remove("border-primary"));
-      swatch.classList.add("border-primary");
+      document
+        .querySelectorAll(".color-swatch")
+        .forEach((s) => s.classList.remove("border-primary"));
+      // Highlight all swatches with the same color, in both panels
+      document
+        .querySelectorAll(`.color-swatch[data-color="${baseDrawingColor}"]`)
+        .forEach((s) => s.classList.add("border-primary"));
+
+      if (isTextMode) {
+        let lastTextAction = null;
+        for (let i = historyStack.length - 1; i >= 0; i--) {
+          if (
+            historyStack[i].type === "text" ||
+            historyStack[i].type === "move"
+          ) {
+            lastTextAction = historyStack[i];
+            break;
+          }
+        }
+        if (lastTextAction) {
+          (lastTextAction.data.to || lastTextAction.data).color = drawingColor;
+          drawImageOnCanvas();
+        }
+      }
     });
   });
 
@@ -463,15 +521,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateUndoRedoState() {
-    if (undoButton) undoButton.disabled = drawnStrokes.length === 0;
-    if (redoButton) redoButton.disabled = redoStrokes.length === 0;
+    if (undoButton) undoButton.disabled = historyStack.length === 0;
+    if (redoButton) redoButton.disabled = redoStack.length === 0;
   }
 
   if (undoButton) {
     undoButton.addEventListener("click", () => {
-      if (drawnStrokes.length > 0) {
-        const lastStroke = drawnStrokes.pop();
-        redoStrokes.push(lastStroke);
+      if (historyStack.length > 0) {
+        const lastAction = historyStack.pop();
+        redoStack.push(lastAction);
         drawImageOnCanvas();
         updateUndoRedoState();
       }
@@ -480,9 +538,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (redoButton) {
     redoButton.addEventListener("click", () => {
-      if (redoStrokes.length > 0) {
-        const strokeToRedo = redoStrokes.pop();
-        drawnStrokes.push(strokeToRedo);
+      if (redoStack.length > 0) {
+        const actionToRedo = redoStack.pop();
+        historyStack.push(actionToRedo);
         drawImageOnCanvas();
         updateUndoRedoState();
       }
@@ -505,10 +563,15 @@ document.addEventListener("DOMContentLoaded", () => {
   function hideAllToolPanels() {
     hideAllSliders();
     if (isDrawingMode) {
-      // Ensure drawing mode is turned off and its panel is hidden
       isDrawingMode = false;
       drawModeButton.classList.remove("active-transform-button");
       document.getElementById("drawing-options").classList.add("hidden");
+      canvas.style.cursor = "default";
+    }
+    if (isTextMode) {
+      isTextMode = false;
+      textModeButton.classList.remove("active-transform-button");
+      document.getElementById("text-options").classList.add("hidden");
       canvas.style.cursor = "default";
     }
   }
@@ -534,6 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (isDrawingMode) toggleDrawingMode();
           if (isCropping) exitCropMode(false);
+          if (isTextMode) toggleTextMode();
         }
       });
     }
@@ -545,10 +609,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if (textModeButton) {
+    textModeButton.addEventListener("click", () => {
+      toggleTextMode();
+    });
+  }
+
   function deactivateAllTools() {
     hideAllSliders();
     if (isDrawingMode) toggleDrawingMode(); // This will also hide the drawing panel
     if (isCropping) exitCropMode(false); // This will exit crop mode
+    if (isTextMode) toggleTextMode();
   }
 
   const firstSwatch = document.querySelector(".color-swatch");
@@ -564,7 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function toggleDrawingMode() {
     isDrawingMode = !isDrawingMode;
     if (isDrawingMode) {
-      hideAllToolPanels(); // Close other tools before opening this one
+      deactivateAllTools();
       isDrawingMode = true;
       drawModeButton.classList.add("active-transform-button");
       document.getElementById("drawing-options").classList.remove("hidden");
@@ -572,6 +643,21 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       drawModeButton.classList.remove("active-transform-button");
       document.getElementById("drawing-options").classList.add("hidden");
+      canvas.style.cursor = "default";
+    }
+  }
+
+  function toggleTextMode() {
+    isTextMode = !isTextMode;
+    if (isTextMode) {
+      deactivateAllTools();
+      isTextMode = true;
+      textModeButton.classList.add("active-transform-button");
+      document.getElementById("text-options").classList.remove("hidden");
+      canvas.style.cursor = "text";
+    } else {
+      textModeButton.classList.remove("active-transform-button");
+      document.getElementById("text-options").classList.add("hidden");
       canvas.style.cursor = "default";
     }
   }
@@ -628,8 +714,8 @@ document.addEventListener("DOMContentLoaded", () => {
     rotationAngle = 0;
     flipH = 1;
     flipV = 1;
-    drawnStrokes = [];
-    redoStrokes = [];
+    historyStack = [];
+    redoStack = [];
 
     deactivateAllTools(); // Deactivate all tools
 
@@ -738,20 +824,58 @@ document.addEventListener("DOMContentLoaded", () => {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-      if (isDrawingMode) {
+      if (isTextMode) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
+
+        const clickedTextAction = getTextElementAt(x, y);
+        if (clickedTextAction) {
+          isMovingText = true;
+          movingTextElement = clickedTextAction;
+          textMoveOffsetX = x - movingTextElement.data.x;
+          textMoveOffsetY = y - movingTextElement.data.y;
+          historyStack.push({
+            type: "move-start",
+            data: { ...movingTextElement.data },
+          });
+        } else {
+          const text = textInput.value;
+          if (!text) {
+            updateStatus("Please enter text in the text box first.");
+            return;
+          }
+          historyStack.push({
+            type: "text",
+            data: {
+              text,
+              x,
+              y,
+              color: drawingColor,
+              size: fontSizeInput.value,
+            },
+          });
+          redoStack = [];
+          updateUndoRedoState();
+          drawImageOnCanvas();
+          textInput.value = "";
+        }
+      } else if (isDrawingMode) {
         isDrawingStroke = true;
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
         const x = (clientX - rect.left) * scaleX;
         const y = (clientY - rect.top) * scaleY;
-        currentStroke = {
+        const currentStroke = {
           color: drawingColor,
           size: brushSize,
           points: [{ x, y }],
         };
-        drawnStrokes.push(currentStroke);
-        redoStrokes = [];
+        historyStack.push({ type: "draw", data: currentStroke });
+        redoStack = [];
         updateUndoRedoState();
         ctx.beginPath();
         ctx.moveTo(x, y);
@@ -778,13 +902,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-      if (isDrawingMode && isDrawingStroke) {
+      if (isMovingText && movingTextElement) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (clientX - rect.left) * (canvas.width / rect.width);
+        const y = (clientY - rect.top) * (canvas.height / rect.height);
+        movingTextElement.data.x = x - textMoveOffsetX;
+        movingTextElement.data.y = y - textMoveOffsetY;
+        drawImageOnCanvas();
+      } else if (isDrawingMode && isDrawingStroke) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
         const x = (clientX - rect.left) * scaleX;
         const y = (clientY - rect.top) * scaleY;
-        currentStroke.points.push({ x, y });
+        const lastAction = historyStack[historyStack.length - 1];
+        if (lastAction && lastAction.type === "draw")
+          lastAction.data.points.push({ x, y });
         ctx.lineTo(x, y);
         ctx.strokeStyle = drawingColor;
         ctx.lineWidth = brushSize;
@@ -822,7 +955,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const handleInteractionEnd = () => {
       if (!currentImage) return;
 
-      if (isDrawingMode && isDrawingStroke) {
+      if (isMovingText) {
+        const lastAction = historyStack[historyStack.length - 1];
+        if (lastAction && lastAction.type === "move-start") {
+          historyStack.pop();
+          historyStack.push({
+            type: "move",
+            data: { from: lastAction.data, to: movingTextElement.data },
+          });
+          redoStack = [];
+          updateUndoRedoState();
+        }
+        isMovingText = false;
+        movingTextElement = null;
+      } else if (isDrawingMode && isDrawingStroke) {
         isDrawingStroke = false;
         drawImageOnCanvas();
       } else if (isCropping && isDrawing) {
@@ -895,17 +1041,27 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCtx.filter = buildFilterString();
         downloadCtx.drawImage(downloadCanvas, 0, 0);
 
-        drawnStrokes.forEach((stroke) => {
-          downloadCtx.beginPath();
-          downloadCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
-          for (let i = 1; i < stroke.points.length; i++) {
-            downloadCtx.lineTo(stroke.points[i].x, stroke.points[i].y);
+        historyStack.forEach((action) => {
+          if (action.type === "draw") {
+            const stroke = action.data;
+            downloadCtx.beginPath();
+            downloadCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
+            for (let i = 1; i < stroke.points.length; i++) {
+              downloadCtx.lineTo(stroke.points[i].x, stroke.points[i].y);
+            }
+            downloadCtx.strokeStyle = stroke.color;
+            downloadCtx.lineWidth = stroke.size;
+            downloadCtx.lineCap = "round";
+            downloadCtx.lineJoin = "round";
+            downloadCtx.stroke();
+          } else if (action.type === "text") {
+            const textEl = action.data;
+            downloadCtx.font = `${textEl.size}px Inter`;
+            downloadCtx.fillStyle = textEl.color;
+            downloadCtx.textAlign = "center";
+            downloadCtx.textBaseline = "middle";
+            downloadCtx.fillText(textEl.text, textEl.x, textEl.y);
           }
-          downloadCtx.strokeStyle = stroke.color;
-          downloadCtx.lineWidth = stroke.size;
-          downloadCtx.lineCap = "round";
-          downloadCtx.lineJoin = "round";
-          downloadCtx.stroke();
         });
 
         const link = document.createElement("a");
