@@ -520,6 +520,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if (fontSizeInput) {
+    fontSizeInput.addEventListener("input", (e) => {
+      if (isTextMode) {
+        let lastTextAction = null;
+        for (let i = historyStack.length - 1; i >= 0; i--) {
+          if (
+            historyStack[i].type === "text" ||
+            historyStack[i].type === "move"
+          ) {
+            lastTextAction = historyStack[i];
+            break;
+          }
+        }
+        if (lastTextAction) {
+          const newSize = parseInt(e.target.value);
+          if (!isNaN(newSize) && newSize > 0) {
+            (lastTextAction.data.to || lastTextAction.data).size = newSize;
+            drawImageOnCanvas();
+          }
+        }
+      }
+    });
+  }
+
   function updateUndoRedoState() {
     if (undoButton) undoButton.disabled = historyStack.length === 0;
     if (redoButton) redoButton.disabled = redoStack.length === 0;
